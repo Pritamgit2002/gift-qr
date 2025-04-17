@@ -47,14 +47,13 @@ import { IUser } from "@/models/user";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { list } from "postcss";
 import { IList } from "@/models/list";
-import AddMoreList from "./add-more-list";
+import { AddMoreList } from "./add-more-list";
 
 type ListProps = {
   ownerEmail: string;
   ownerName: string;
   ownerType: IUser["type"];
 };
-
 const Lists = (data: ListProps) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [userName, setUserName] = useState<string>("");

@@ -16,7 +16,6 @@ import { addPaidInList } from "../../action/add-paid-in-list";
 import { getListByName } from "../../action/get-list-by-name";
 import { loadScript } from "@/utils/razorpayScript";
 import { useDraft } from "./useDraft";
-
 type UseListsProps = {
   userEmail: string;
   userName: string;
@@ -34,17 +33,33 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLoadingLists, setIsLoadingLists] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isPaid, setIsPaid] = useState<boolean>(
     userType === "guest" ? true : false
   );
   const [isUpdatedAt, setIsUpdatedAt] = useState<number>(0);
+  const [isAddingList, setIsAddingList] = useState(false);
+  const [isDeletingList, setIsDeletingList] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [isAddingItem, setIsAddingItem] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+  const [isDeletingItem, setIsDeletingItem] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("🔥 useEffect triggered with isUpdatedAt =", isUpdatedAt);
 
     const fetchLists = async () => {
       console.log("Fetching lists...");
+      setIsLoadingLists(true);
+      setError(null);
+
       try {
         const response = await getLists({ email: userEmail });
         if (response.success) {
@@ -52,10 +67,14 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
           console.log("Fetched lists:", response.data);
         } else {
           toast.error("Failed to load lists");
+          setError("Failed to load lists");
         }
       } catch (error) {
         console.error("Error fetching lists:", error);
         toast.error("Error fetching lists");
+        setError("Error fetching lists");
+      } finally {
+        setIsLoadingLists(false);
       }
     };
 
@@ -71,6 +90,18 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
     //const file = e.target.files?.[0];
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size exceeds 5MB limit");
+      return;
+    }
+
+    // Check file type
+    if (!file.type.includes("image/")) {
+      toast.error("File must be an image");
+      return;
+    }
 
     const formattedName = file.name
       .split(".")[0]
@@ -122,6 +153,7 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
     }
 
     setLoading(true);
+    setUploading(true);
 
     try {
       const formData = new FormData();
@@ -168,14 +200,20 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       toast.error("Error uploading image");
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
   // Image Deletion Method
   const handleDeleteImage = async (listName: string, image: IImage) => {
-    if (!userEmail) return;
+    if (!userEmail) {
+      toast.error("You must be logged in to delete an image");
+      return;
+    }
 
     setLoading(true);
+    const listKey = `${listName}-${image.imageName}`;
+    setIsDeletingItem({ ...isDeletingItem, [listKey]: true });
 
     try {
       const response = await deleteAwsImageLinkToList({
@@ -210,6 +248,7 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       toast.error("Error deleting image");
     } finally {
       setLoading(false);
+      setIsDeletingItem({ ...isDeletingItem, [listKey]: false });
     }
   };
 
@@ -232,6 +271,8 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       toast.error("Each list name must be unique.");
       return;
     }
+
+    setIsAddingList(true);
 
     const newList: IList = {
       id: `list-${Date.now()}`, // Generate a unique ID
@@ -268,6 +309,8 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsAddingList(false);
     }
   };
 
@@ -276,6 +319,8 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       toast.error("You must be logged in to delete a list...");
       return;
     }
+
+    setIsDeletingList({ ...isDeletingList, [name]: true });
 
     try {
       const response = await deleteList({
@@ -292,6 +337,8 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       }
     } catch (error) {
       toast.error("An error occurred while deleting the list");
+    } finally {
+      setIsDeletingList({ ...isDeletingList, [name]: false });
     }
   };
 
@@ -346,6 +393,10 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       }
     }
 
+    const itemKey = `${listName}-${isMessage ? "message" : "link"}`;
+    setIsAddingItem({ ...isAddingItem, [itemKey]: true });
+    setIsSaving(true);
+
     try {
       const payload: AddListData = {
         ownerEmail: userEmail,
@@ -383,6 +434,9 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       }
     } catch (error) {
       toast.error(isMessage ? "Error adding message" : "Error adding link");
+    } finally {
+      setIsSaving(false);
+      setIsAddingItem({ ...isAddingItem, [itemKey]: false });
     }
   };
 
@@ -393,32 +447,44 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       return;
     }
 
+    const itemKey = `${listName}-link-${link}`;
+    setIsDeletingItem({ ...isDeletingItem, [itemKey]: true });
+
     if (list.links.includes(link)) {
-      const response = await deleteLinkFromList({
-        ownerEmail: userEmail || "",
-        listName: listName,
-        link: link,
-        ownerType: userType,
-      });
+      try {
+        const response = await deleteLinkFromList({
+          ownerEmail: userEmail || "",
+          listName: listName,
+          link: link,
+          ownerType: userType,
+        });
 
-      if (response.success) {
-        toast.success(response.message);
+        if (response.success) {
+          toast.success(response.message);
 
-        // Update lists by removing the link
-        const updatedLists = lists.map((list) =>
-          list.name === listName
-            ? {
-                ...list,
-                links: list.links.filter((l) => l !== link),
-                updatedAt: Date.now(),
-              }
-            : list
-        );
+          // Update lists by removing the link
+          const updatedLists = lists.map((list) =>
+            list.name === listName
+              ? {
+                  ...list,
+                  links: list.links.filter((l) => l !== link),
+                  updatedAt: Date.now(),
+                }
+              : list
+          );
 
-        setLists(updatedLists);
-      } else {
-        toast.error(response.message);
+          setLists(updatedLists);
+        } else {
+          toast.error(response.message);
+        }
+      } catch (error) {
+        toast.error("Error removing link");
+      } finally {
+        setIsDeletingItem({ ...isDeletingItem, [itemKey]: false });
       }
+    } else {
+      toast.error("Link not found in the list");
+      setIsDeletingItem({ ...isDeletingItem, [itemKey]: false });
     }
   };
 
@@ -429,50 +495,69 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       return;
     }
 
+    const itemKey = `${listName}-message-${message}`;
+    setIsDeletingItem({ ...isDeletingItem, [itemKey]: true });
+
     if (list.messages.includes(message)) {
-      const response = await deleteMessageFromList({
-        ownerEmail: userEmail || "",
-        listName: listName,
-        message: message,
-        ownerType: userType,
-      });
+      try {
+        const response = await deleteMessageFromList({
+          ownerEmail: userEmail || "",
+          listName: listName,
+          message: message,
+          ownerType: userType,
+        });
 
-      if (response.success) {
-        toast.success(response.message);
+        if (response.success) {
+          toast.success(response.message);
 
-        // Update lists by removing the message
-        const updatedLists = lists.map((list) =>
-          list.name === listName
-            ? {
-                ...list,
-                messages: list.messages.filter((m) => m !== message),
-                updatedAt: Date.now(),
-              }
-            : list
-        );
+          // Update lists by removing the message
+          const updatedLists = lists.map((list) =>
+            list.name === listName
+              ? {
+                  ...list,
+                  messages: list.messages.filter((m) => m !== message),
+                  updatedAt: Date.now(),
+                }
+              : list
+          );
 
-        setLists(updatedLists);
-      } else {
+          setLists(updatedLists);
+        } else {
+          toast.error("Error removing message");
+        }
+      } catch (error) {
         toast.error("Error removing message");
+      } finally {
+        setIsDeletingItem({ ...isDeletingItem, [itemKey]: false });
       }
+    } else {
+      toast.error("Message not found in the list");
+      setIsDeletingItem({ ...isDeletingItem, [itemKey]: false });
     }
   };
 
   const handleUpdatedTime = async () => {
-    const response = await getLists({ email: userEmail });
-    if (response.success) {
-      const latestUpdateTime = response.data.reduce(
-        (acc, curr) => acc + curr.updatedAt,
-        0
-      );
-      console.log("Previous:", isUpdatedAt);
-      console.log("New:", latestUpdateTime);
+    setIsLoadingLists(true);
+    try {
+      const response = await getLists({ email: userEmail });
+      if (response.success) {
+        const latestUpdateTime = response.data.reduce(
+          (acc, curr) => acc + curr.updatedAt,
+          0
+        );
+        console.log("Previous:", isUpdatedAt);
+        console.log("New:", latestUpdateTime);
 
-      if (latestUpdateTime !== isUpdatedAt) {
-        setIsUpdatedAt(latestUpdateTime);
-      } else {
-        console.log("No change in updated time");
+        if (latestUpdateTime !== isUpdatedAt) {
+          setIsUpdatedAt(latestUpdateTime);
+        } else {
+          console.log("No change in updated time");
+        }
       }
+    } catch (error) {
+      console.error("Error checking for updates:", error);
+    } finally {
+      setIsLoadingLists(false);
     }
   };
 
@@ -492,6 +577,8 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       return;
     }
 
+    setIsProcessingPayment(true);
+
     try {
       // Get list data
       const listData = await getListByName({
@@ -501,11 +588,13 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
 
       if (!listData.success) {
         toast.error(listData.message);
+        setIsProcessingPayment(false);
         return;
       }
 
       if (listData.data.paid) {
         toast.error("List is already paid");
+        setIsProcessingPayment(false);
         return;
       }
 
@@ -527,10 +616,11 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       console.log("totalItem", totalItem);
       if (totalItem < 5) {
         console.log("hello total Item");
-        return toast.error(
-          "Atleast there must be 5 items in the list to proceed...star"
+        toast.error(
+          "At least there must be 5 items in the list to proceed...star"
         );
-        //return;
+        setIsProcessingPayment(false);
+        return;
       }
 
       const totalPrice =
@@ -542,6 +632,7 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
 
       if (totalPrice <= 5) {
         toast.error("Price must be greater than Five Rupees");
+        setIsProcessingPayment(false);
         return;
       }
 
@@ -556,6 +647,7 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         toast.error(
           "Razorpay SDK failed to load. Please check your internet connection."
         );
+        setIsProcessingPayment(false);
         return;
       }
 
@@ -577,10 +669,16 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         }),
       });
 
+      if (!orderResponse.ok) {
+        const errorText = await orderResponse.text();
+        throw new Error(`Failed to create order: ${errorText}`);
+      }
+
       const orderData = await orderResponse.json();
 
       if (!orderData.success) {
         toast.error("Could not create order. Please try again.");
+        setIsProcessingPayment(false);
         return;
       }
 
@@ -594,43 +692,57 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         order_id: orderData.order.id,
         handler: async function (razorpayResponse: any) {
           // Verify payment on your server
-          const verifyResponse = await fetch("/api/verify-payment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              razorpay_order_id: razorpayResponse.razorpay_order_id,
-              razorpay_payment_id: razorpayResponse.razorpay_payment_id,
-              razorpay_signature: razorpayResponse.razorpay_signature,
-            }),
-          });
-
-          const verifyData = await verifyResponse.json();
-
-          if (verifyData.success) {
-            // Update list as paid in your database
-            const dbUpdateResponse = await addPaidInList({
-              ownerEmail: userEmail,
-              listName: listName,
-              price: totalPrice,
-              isPaid: true,
-              ownerType: ownerType as IUser["type"],
-              paymentId: razorpayResponse.razorpay_payment_id,
-              orderId: razorpayResponse.razorpay_order_id,
+          try {
+            const verifyResponse = await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                razorpay_order_id: razorpayResponse.razorpay_order_id,
+                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                razorpay_signature: razorpayResponse.razorpay_signature,
+              }),
             });
 
-            console.log("dbUpdateResponse", dbUpdateResponse);
-
-            if (dbUpdateResponse.success) {
-              console.log("Response: ", dbUpdateResponse.data);
-              toast.success(dbUpdateResponse.message);
-              setIsPaid(true);
-            } else {
-              toast.error(dbUpdateResponse.message);
+            if (!verifyResponse.ok) {
+              const errorText = await verifyResponse.text();
+              throw new Error(`Payment verification failed: ${errorText}`);
             }
-          } else {
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyData.success) {
+              // Update list as paid in your database
+              const dbUpdateResponse = await addPaidInList({
+                ownerEmail: userEmail,
+                listName: listName,
+                price: totalPrice,
+                isPaid: true,
+                ownerType: ownerType as IUser["type"],
+                paymentId: razorpayResponse.razorpay_payment_id,
+                orderId: razorpayResponse.razorpay_order_id,
+              });
+
+              console.log("dbUpdateResponse", dbUpdateResponse);
+
+              if (dbUpdateResponse.success) {
+                console.log("Response: ", dbUpdateResponse.data);
+                toast.success(dbUpdateResponse.message);
+                setIsPaid(true);
+              } else {
+                toast.error(dbUpdateResponse.message);
+              }
+            } else {
+              toast.error(
+                "Payment verification failed. Please contact support."
+              );
+            }
+          } catch (error) {
+            console.error("Payment verification error:", error);
             toast.error("Payment verification failed. Please contact support.");
+          } finally {
+            setIsProcessingPayment(false);
           }
         },
         prefill: {
@@ -641,6 +753,11 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         theme: {
           color: "#3399cc",
         },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+          },
+        },
       };
 
       // Open Razorpay payment form
@@ -650,10 +767,12 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       // Handle payment failures
       paymentObject.on("payment.failed", function (failureResponse: any) {
         toast.error(`Payment failed: ${failureResponse.error.description}`);
+        setIsProcessingPayment(false);
       });
     } catch (error) {
       console.error("Payment error:", error);
       toast.error("An error occurred while processing the payment");
+      setIsProcessingPayment(false);
     }
   };
 
@@ -666,6 +785,13 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
     listName,
     inputValues,
     isSaving,
+    isLoadingLists,
+    isAddingList,
+    isDeletingList,
+    isAddingItem,
+    isDeletingItem,
+    isProcessingPayment,
+    error,
     setListName,
     setInputValues,
     addList,

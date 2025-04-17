@@ -11,12 +11,14 @@ import { deleteMessageFromDraft } from "../../action/draft/delete-message-from-d
 import { deleteImagesInDraft } from "../../action/draft/delete-images-in-draft";
 import { loadScript } from "@/utils/razorpayScript";
 import { addDraftToList } from "../../action/draft/add-draft-to-list";
+import { on } from "events";
 
 type AddMoreListProps = {
   listName: string;
   isPaid: boolean;
   ownerEmail: string;
 };
+
 export const useDraft = ({
   ownerEmail,
   listName,
@@ -29,6 +31,16 @@ export const useDraft = ({
       image: IImage[];
     };
   }>({});
+
+  // Loading states
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetchingDraft, setIsFetchingDraft] = useState<boolean>(false);
+  const [isAddingItem, setIsAddingItem] = useState<boolean>(false);
+  const [isAddingImage, setIsAddingImage] = useState<boolean>(false);
+  const [isDeletingItem, setIsDeletingItem] = useState<boolean>(false);
+  const [isProcessingPayment, setIsProcessingPayment] =
+    useState<boolean>(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [draftPaymentStatus, setDraftPaymentStatus] = useState<
     "unpaid" | "paid"
@@ -42,6 +54,9 @@ export const useDraft = ({
 
   useEffect(() => {
     async function fetchDraft() {
+      if (!ownerEmail || !listName) return;
+
+      setIsFetchingDraft(true);
       try {
         const response = await fetchDraftByName({
           ownerEmail: ownerEmail,
@@ -58,11 +73,12 @@ export const useDraft = ({
             },
           });
           setDraftPaymentStatus(response.data.status);
-
           console.log("response.data.images", response.data.images);
         }
       } catch (error) {
         toast.error("Failed to fetch draft data.");
+      } finally {
+        setIsFetchingDraft(false);
       }
     }
 
@@ -76,8 +92,10 @@ export const useDraft = ({
     message: [],
     image: [],
   };
+
   const handleClickMoreItems = async (listName: string) => {
     try {
+      setIsAddingItem(true);
       const trimmedLink = moreItemLink.trim();
       const trimmedMessage = moreItemMessage.trim();
 
@@ -114,7 +132,6 @@ export const useDraft = ({
         draftName: "draft_" + listName,
         links: updatedLinks,
         messages: updatedMessages,
-        // images: updatedImages,
       });
 
       if (response.success) {
@@ -124,8 +141,11 @@ export const useDraft = ({
       }
     } catch (error: any) {
       toast.error(error.message);
+    } finally {
+      setIsAddingItem(false);
     }
   };
+
   const handleImageChange = (
     fileInputRef: React.RefObject<HTMLInputElement>
   ) => {
@@ -148,6 +168,7 @@ export const useDraft = ({
     }
 
     try {
+      setIsAddingImage(true);
       const formData = new FormData();
       formData.append("ownerEmail", ownerEmail);
       formData.append("listName", listName);
@@ -166,11 +187,14 @@ export const useDraft = ({
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsAddingImage(false);
     }
   };
 
   const handleLinkDelete = async (listName: string, link: string) => {
     try {
+      setIsDeletingItem(true);
       const response = await deleteLinkFromDraft({
         ownerEmail: ownerEmail,
         listName: listName,
@@ -195,11 +219,14 @@ export const useDraft = ({
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong while deleting link");
+    } finally {
+      setIsDeletingItem(false);
     }
   };
 
   const handleMessageDelete = async (listName: string, message: string) => {
     try {
+      setIsDeletingItem(true);
       const response = await deleteMessageFromDraft({
         ownerEmail: ownerEmail,
         listName: listName,
@@ -226,11 +253,14 @@ export const useDraft = ({
       toast.error(
         error.message || "Something went wrong while deleting message"
       );
+    } finally {
+      setIsDeletingItem(false);
     }
   };
 
   const handleImageDelete = async (listName: string, imageUrl: string) => {
     try {
+      setIsDeletingItem(true);
       const response = await deleteImagesInDraft({
         ownerEmail: ownerEmail,
         listName: listName,
@@ -241,8 +271,6 @@ export const useDraft = ({
       if (response.success) {
         toast.success(response.message);
 
-        // The issue here was the property name - based on your schema,
-        // it should be "images" (plural), not "image"
         const updatedImages = moreItems[listName].image.filter(
           (item) => item.url !== imageUrl
         );
@@ -251,7 +279,7 @@ export const useDraft = ({
           ...moreItems,
           [listName]: {
             ...moreItems[listName],
-            image: updatedImages, // Using "images" instead of "image"
+            image: updatedImages,
           },
         });
       } else {
@@ -259,6 +287,8 @@ export const useDraft = ({
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong while deleting image");
+    } finally {
+      setIsDeletingItem(false);
     }
   };
 
@@ -272,6 +302,7 @@ export const useDraft = ({
   const handleDraftPayment = async (listName: string, ownerEmail: string) => {
     console.log("handleDraftPayment");
     try {
+      setIsProcessingPayment(true);
       const response = await fetchDraftByName({
         ownerEmail: ownerEmail,
         listName: listName,
@@ -280,6 +311,7 @@ export const useDraft = ({
 
       if (!response.success) {
         toast.error(response.message);
+        setIsProcessingPayment(false);
         return { success: false };
       }
 
@@ -304,6 +336,7 @@ export const useDraft = ({
         toast.error(
           "Razorpay SDK failed to load. Please check your internet connection."
         );
+        setIsProcessingPayment(false);
         return { success: false };
       }
 
@@ -329,6 +362,7 @@ export const useDraft = ({
 
       if (!orderData.success) {
         toast.error("Could not create order. Please try again.");
+        setIsProcessingPayment(false);
         return { success: false };
       }
 
@@ -343,50 +377,67 @@ export const useDraft = ({
           description: `Payment for list: ${listName}`,
           order_id: orderData.order.id,
           handler: async function (razorpayResponse: any) {
-            // Verify payment on your server
-            const verifyResponse = await fetch("/api/verify-payment", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                razorpay_order_id: razorpayResponse.razorpay_order_id,
-                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
-                razorpay_signature: razorpayResponse.razorpay_signature,
-              }),
-            });
-
-            const verifyData = await verifyResponse.json();
-            if (verifyData.success) {
-              // Update list as paid in your database
-              console.log("Response: ", verifyData.data);
-              const listUpdateResponse = await addDraftToList({
-                ownerEmail: ownerEmail,
-                listName: listName,
-                draftName: "draft_" + listName,
+            try {
+              // Verify payment on your server
+              const verifyResponse = await fetch("/api/verify-payment", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: razorpayResponse.razorpay_order_id,
+                  razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                  razorpay_signature: razorpayResponse.razorpay_signature,
+                }),
               });
 
-              if (listUpdateResponse.success) {
-                toast.success(listUpdateResponse.message);
-                resolve({ success: true });
+              const verifyData = await verifyResponse.json();
+              if (verifyData.success) {
+                // Update list as paid in your database
+                console.log("Response: ", verifyData.data);
+                const listUpdateResponse = await addDraftToList({
+                  ownerEmail: ownerEmail,
+                  listName: listName,
+                  draftName: "draft_" + listName,
+                });
+
+                if (listUpdateResponse.success) {
+                  toast.success(listUpdateResponse.message);
+                  resolve({ success: true });
+                } else {
+                  toast.error(listUpdateResponse.message);
+                  resolve({ success: false });
+                }
+                toast.success(verifyData.message);
               } else {
-                toast.error(listUpdateResponse.message);
+                toast.error(
+                  "Payment verification failed. Please contact support."
+                );
                 resolve({ success: false });
               }
-              toast.success(verifyData.message);
-            } else {
-              toast.error(
-                "Payment verification failed. Please contact support."
-              );
-              resolve({ success: false });
+            } finally {
+              setIsProcessingPayment(false);
             }
           },
           prefill: {
             email: ownerEmail,
-            contact: "", // You can add user's phone here if available
+            listName: listName,
           },
           theme: {
             color: "#3399cc",
+          },
+          onClose: () => {
+            toast.info("Payment popup closed.");
+            setIsProcessingPayment(false);
+            resolve({ success: false }); // <-- resolve here too
+          },
+          onError: (error: any) => {
+            toast.error(`Payment failed: ${error.error.description}`);
+            setIsProcessingPayment(false);
+          },
+          onPaymentSuccess: (response: any) => {
+            toast.success(response.message);
+            setIsProcessingPayment(false);
           },
         };
 
@@ -397,16 +448,19 @@ export const useDraft = ({
         // Handle payment failures
         paymentObject.on("payment.failed", function (failureResponse: any) {
           toast.error(`Payment failed: ${failureResponse.error.description}`);
+          setIsProcessingPayment(false);
           resolve({ success: false });
         });
       });
     } catch (error) {
       toast.error("An error occurred while fetching the draft");
+      setIsProcessingPayment(false);
       return { success: false };
     }
   };
+
   return {
-    setDraftPaymentStatus,
+    // States
     moreItems,
     fileInputRef,
     moreItemLink,
@@ -415,7 +469,19 @@ export const useDraft = ({
     imageName,
     previewImage,
     totalPrice,
+    draftPaymentStatus,
 
+    // Loading states
+    isLoading,
+    isFetchingDraft,
+    isAddingItem,
+    isAddingImage,
+    isDeletingItem,
+    isProcessingPayment,
+
+    // Setters
+    setIsProcessingPayment,
+    setDraftPaymentStatus,
     setMoreItemLink,
     setMoreItemMessage,
     setMoreItemImage,
@@ -423,6 +489,7 @@ export const useDraft = ({
     setPreviewImage,
     setTotalPrice,
 
+    // Handlers
     handleClickMoreItems,
     handleImageChange,
     handleClickAddMoreImages,
