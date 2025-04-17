@@ -19,7 +19,7 @@ export const deleteFromS3 = async (
 
     await s3.send(
       new DeleteObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: process.env.CUSTOM_AWS_BUCKET_NAME,
         Key: actualKey,
       })
     );

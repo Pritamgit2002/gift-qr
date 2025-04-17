@@ -25,7 +25,7 @@ export const uploadToS3 = async (
     const fullPath = `${data.folderPath.replace(/^\/+|\/+$/g, "")}/${nanoid()}`;
 
     const params = {
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: process.env.CUSTOM_AWS_BUCKET_NAME,
       Key: fullPath,
       Body: Buffer.from(fileBuffer),
       ContentType: data.file.type,
@@ -34,7 +34,7 @@ export const uploadToS3 = async (
     const command = new PutObjectCommand(params);
     await s3.send(command);
 
-    const url = `https://s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${fullPath}`;
+    const url = `https://s3.${process.env.CUSTOM_AWS_BUCKET_REGION}.amazonaws.com/${process.env.CUSTOM_AWS_BUCKET_NAME}/${fullPath}`;
 
     return {
       success: true,
