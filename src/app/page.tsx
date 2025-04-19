@@ -12,9 +12,7 @@ import Lists from "@/components/lists";
 import "@fontsource/poppins";
 import "@fontsource/rubik";
 import Image from "next/image";
-import { get } from "http";
 import { deleteUserByEmail } from "../../action/delete-user-by-email";
-import { deleteList } from "../../action/delete-list";
 import { IUser } from "@/models/user";
 
 export default function Home() {
@@ -56,56 +54,6 @@ export default function Home() {
   useEffect(() => {
     console.log("pro star");
   }, []);
-
-  // const handleGuestLogin = async () => {
-  //   try {
-  //     const guestUserEmail = "Guest_Email" + Math.floor(Math.random() * 10000);
-  //     var guestUserName = "Guest_Name " + Math.floor(Math.random() * 10000);
-
-  //     console.log("syska", guestUserName);
-  //     const result = await addUser({
-  //       id: "Guest-" + Math.floor(Math.random() * 10000),
-  //       name: guestUserName,
-  //       email: guestUserEmail,
-  //       avatar: "demo",
-  //       type: "guest",
-  //     });
-  //     setGuestEmail(guestUserEmail);
-  //     setGuestName(guestUserName);
-  //     if (result.success) {
-  //       toast.success("Guest added successfully!");
-  //       setIsGuest(true);
-  //       localStorage.setItem("guest", "true");
-  //     } else {
-  //       toast.error(result.message);
-  //     }
-  //     console.log("oreo");
-  //   } catch (error) {
-  //     toast.error("Error adding guest: " + error);
-  //   }
-  // };
-
-  // const handleLogout = async () => {
-  //   try {
-  //     const res = await deleteUserByEmail({
-  //       email: guestEmail,
-  //       type: "guest",
-  //     });
-  //     if (res.success) {
-  //       setIsGuest(false);
-  //       localStorage.removeItem("guest");
-  //       toast.success("Guest deleted successfully");
-  //     } else {
-  //       toast.error(res.message);
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error deleting guest: " + error);
-  //   }
-  // };
-
-  // const handleAllSignOut = () => {
-  //   signOut();
-  // };
 
   const handleAllSignOut = async (
     email: IUser["email"],
@@ -202,12 +150,6 @@ export default function Home() {
           >
             Log In
           </Button>
-          {/* <Button
-        onClick={handleGuestLogin}
-        className="mt-6 bg-gray-900 text-white font-semibold px-6 py-3 rounded-md shadow-md hover:bg-gray-700"
-      >
-        As Guest
-      </Button> */}
           <Card className="mt-8 bg-white border border-gray-200 shadow-md w-full max-w-xl rounded-2xl">
             <CardHeader className="text-2xl font-semibold text-center text-gray-800 py-4">
               Steps to get started
