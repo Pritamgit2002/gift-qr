@@ -10,7 +10,7 @@ export default function LoginPage() {
 
   // If authenticated, redirect to home page
   if (status === "authenticated") {
-    redirect("/");
+    redirect("/create-qr");
   }
 
   return (
@@ -18,7 +18,8 @@ export default function LoginPage() {
       <div className="flex flex-col items-center gap-6">
         <h1 className="text-2xl font-bold text-white">QR Code Generator</h1>
         <p className="text-neutral-400 max-w-md text-center mb-4">
-          Please sign in with your Google account to access the QR code generator app.
+          Please sign in with your Google account to access the QR code
+          generator app.
         </p>
         <AuthButtons />
       </div>

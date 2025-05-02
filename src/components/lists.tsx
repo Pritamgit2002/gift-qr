@@ -512,7 +512,7 @@ const Lists = (data: ListProps) => {
                       key={index}
                       className="flex justify-between items-center bg-gray-100 p-2 rounded"
                     >
-                      <span className="text-sm truncate max-w-[80%] text-gray-800">
+                      <span className="text-sm truncate text-gray-800">
                         {link}
                       </span>
                       <Button

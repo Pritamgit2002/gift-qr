@@ -15,7 +15,6 @@ import { IUser } from "@/models/user";
 import { addPaidInList } from "../../action/add-paid-in-list";
 import { getListByName } from "../../action/get-list-by-name";
 import { loadScript } from "@/utils/razorpayScript";
-import { useDraft } from "./useDraft";
 type UseListsProps = {
   userEmail: string;
   userName: string;

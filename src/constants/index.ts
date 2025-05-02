@@ -6,9 +6,6 @@ export const formatUrl = (url: string): string => {
   if (!/^https?:\/\//.test(url)) {
     url = "https://" + url;
   }
-  if (!/^https?:\/\/www\./.test(url)) {
-    url = url.replace(/^https?:\/\//, "https://www.");
-  }
   return url;
 };
 

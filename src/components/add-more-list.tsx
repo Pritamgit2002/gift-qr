@@ -172,7 +172,7 @@ export const AddMoreList = ({
   console.log("showPaymentProcessing", showPaymentProcessing);
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 ">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 transition-all transform hover:scale-105 shadow-lg">
@@ -181,9 +181,9 @@ export const AddMoreList = ({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-w-2xl bg-gray-50">
+        <DialogContent className="max-w-2xl bg-gray-50 ">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-indigo-700">
+            <DialogTitle className="text-2xl font-bold text-indigo-700 ">
               Add more items to: {listName}
             </DialogTitle>
             <DialogDescription className="text-gray-600">
@@ -201,8 +201,8 @@ export const AddMoreList = ({
               </div>
             </div>
           ) : (
-            <>
-              <div className="flex flex-wrap justify-center gap-3 mt-4">
+            <div className="max-w-[625px] mx-auto">
+              <div className="flex flex-wrap justify-center gap-3 mt-4 ">
                 {/* Link Input */}
                 <Dialog
                   open={activeDialog === "link"}
@@ -382,7 +382,7 @@ export const AddMoreList = ({
               </div>
 
               {/* Tab Section */}
-              <Tabs defaultValue="links" className="mt-6">
+              <Tabs defaultValue="links" className="mt-6 w-full ">
                 <TabsList className="grid grid-cols-3 gap-2 max-w-md mx-auto bg-gray-200">
                   <TabsTrigger
                     value="links"
@@ -408,7 +408,7 @@ export const AddMoreList = ({
                 {/* Link List */}
                 <TabsContent
                   value="links"
-                  className="mt-4 space-y-2 max-h-[300px] overflow-y-auto p-2"
+                  className="mt-4 space-y-2 max-h-[300px] overflow-y-auto p-2 "
                 >
                   {isDeletingItem && (
                     <div className="flex justify-center mb-2">
@@ -427,7 +427,7 @@ export const AddMoreList = ({
                         item?.length > 0 && (
                           <Card
                             key={index}
-                            className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border-l-4 border-indigo-500 hover:shadow-md transition-all"
+                            className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border-l-4 border-indigo-500 hover:shadow-md transition-all w-auto "
                           >
                             <div className="flex items-center space-x-2 flex-grow overflow-hidden">
                               <FaLink className="text-indigo-600 flex-shrink-0" />
@@ -659,7 +659,7 @@ export const AddMoreList = ({
                   </DialogContent>
                 </Dialog>
               )}
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>

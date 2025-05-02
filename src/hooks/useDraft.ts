@@ -11,7 +11,7 @@ import { deleteMessageFromDraft } from "../../action/draft/delete-message-from-d
 import { deleteImagesInDraft } from "../../action/draft/delete-images-in-draft";
 import { loadScript } from "@/utils/razorpayScript";
 import { addDraftToList } from "../../action/draft/add-draft-to-list";
-import { on } from "events";
+import { formatUrl, isValidLink } from "@/constants";
 
 type AddMoreListProps = {
   listName: string;
@@ -101,9 +101,14 @@ export const useDraft = ({
 
       if (!trimmedLink && !trimmedMessage) return;
 
+      if (!trimmedMessage && !isValidLink(trimmedLink)) {
+        toast.error("Invalid link.");
+        return;
+      }
+
       const updatedLinks =
         trimmedLink && !prevList.link.includes(trimmedLink)
-          ? [...prevList.link, trimmedLink]
+          ? [...prevList.link, formatUrl(trimmedLink)]
           : [...prevList.link];
 
       const updatedMessages =
