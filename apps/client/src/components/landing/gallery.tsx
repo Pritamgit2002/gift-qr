@@ -1,19 +1,21 @@
-import Image, { type StaticImageData } from "next/image";
-import teaTable from "../../../public/images/five.jpg";
-import weddingSign from "../../../public/images/four.jpg";
-import byTheFlowers from "../../../public/images/one.webp";
-import inACard from "../../../public/images/six.jpg";
-import onAnEasel from "../../../public/images/three.jpg";
-import tableTent from "../../../public/images/two.jpg";
+import {
+  BirthdayCardScene,
+  EnvelopeScene,
+  FridgeNoteScene,
+  GiftTagScene,
+  TableTentScene,
+  WelcomeSignScene,
+  type Scene,
+} from "@/components/brand/scenes";
 import styles from "./landing.module.css";
 
-const photos: { src: StaticImageData; alt: string; caption: string; tilt: number }[] = [
-  { src: teaTable, alt: "A pink scan-me sign with a QR code on a table", caption: "on the tea table", tilt: -3 },
-  { src: weddingSign, alt: "A green share-the-love sign with a QR code", caption: "wedding welcome sign", tilt: 2 },
-  { src: byTheFlowers, alt: "A capture-the-love sign with a QR code beside flowers", caption: "next to the flowers", tilt: -2 },
-  { src: inACard, alt: "Two printed cards with QR codes", caption: "tucked in a card", tilt: 3 },
-  { src: onAnEasel, alt: "A pink share-the-love sign on an easel", caption: "on an easel", tilt: -3 },
-  { src: tableTent, alt: "A pink table sign with a QR code", caption: "party table tent", tilt: 2 },
+const ideas: { Scene: Scene; alt: string; caption: string; tilt: number }[] = [
+  { Scene: BirthdayCardScene, alt: "A birthday card with a QR code inside", caption: "inside a birthday card", tilt: -3 },
+  { Scene: GiftTagScene, alt: "A gift tag with a QR code, tied to a wrapped box", caption: "on the gift tag", tilt: 2 },
+  { Scene: WelcomeSignScene, alt: "A welcome sign with a QR code on an easel", caption: "wedding welcome sign", tilt: -2 },
+  { Scene: TableTentScene, alt: "A table card with a QR code next to a cup of tea", caption: "party table tent", tilt: 3 },
+  { Scene: EnvelopeScene, alt: "A letter with a QR code sliding out of an envelope", caption: "sealed in an envelope", tilt: -3 },
+  { Scene: FridgeNoteScene, alt: "A note with a QR code held on a fridge by a heart magnet", caption: "stuck on the fridge", tilt: 2 },
 ];
 
 export function Gallery() {
@@ -33,22 +35,17 @@ export function Gallery() {
       <div className="mt-[30px] overflow-hidden">
         {/* The second copy keeps the loop seamless and stays out of the accessibility tree. */}
         <div className={styles.track}>
-          {[...photos, ...photos].map((photo, i) => {
-            const copy = i >= photos.length;
+          {[...ideas, ...ideas].map((idea, i) => {
+            const copy = i >= ideas.length;
             return (
               <figure
                 key={i}
                 className={styles.polaroid}
-                style={{ transform: `rotate(${photo.tilt}deg)` }}
+                style={{ transform: `rotate(${idea.tilt}deg)` }}
                 aria-hidden={copy || undefined}
               >
-                <Image
-                  src={photo.src}
-                  alt={copy ? "" : photo.alt}
-                  className="block h-[216px] w-[216px] rounded object-cover"
-                  sizes="216px"
-                />
-                <figcaption className="mt-2 text-center font-hand text-2xl font-bold">{photo.caption}</figcaption>
+                <idea.Scene className="block h-[216px] w-[216px] rounded" label={copy ? undefined : idea.alt} />
+                <figcaption className="mt-2 text-center font-hand text-2xl font-bold">{idea.caption}</figcaption>
               </figure>
             );
           })}

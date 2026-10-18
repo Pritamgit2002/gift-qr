@@ -1,12 +1,11 @@
 import type { CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, Link as LinkIcon, MessageSquare, Play } from "lucide-react";
 import { buttonVariants } from "@/components/brand/button";
 import { QrArt, Sparkle } from "@/components/brand/art";
 import { FallingConfetti, type FallingPiece } from "@/components/brand/confetti";
 import { cn } from "@/lib/utils";
-import birthdayPhoto from "../../../public/images/process.jpg";
+import { BirthdayScene } from "@/components/brand/scenes";
 import styles from "./landing.module.css";
 
 const confetti: FallingPiece[] = [
@@ -238,7 +237,7 @@ function HeroStage() {
         <div className="absolute left-[400px] top-[250px] z-[5] animate-pop-in" style={{ animationDelay: "1.85s" }}>
           <div className="animate-float [animation-direction:reverse] [animation-duration:7s]">
             <div className="w-[150px] -rotate-[7deg] rounded-lg bg-white px-2 pb-2.5 pt-2 shadow-[0_16px_30px_-14px_rgba(35,20,46,.55)]">
-              <Image src={birthdayPhoto} alt="" className="block h-[120px] w-[134px] rounded object-cover" sizes="134px" />
+              <BirthdayScene className="block h-[120px] w-[134px] rounded" />
               <span className="mt-1 block text-center font-hand text-xl font-bold">best. birthday. ever.</span>
             </div>
           </div>

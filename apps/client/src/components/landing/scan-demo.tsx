@@ -1,27 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import Image, { type StaticImageData } from "next/image";
 import { Image as ImageIcon, Link as LinkIcon, Loader2, MessageSquare, Play, RotateCw } from "lucide-react";
 import { buttonVariants } from "@/components/brand/button";
 import { GiftMark } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
-import birthdayPhoto from "../../../public/images/process.jpg";
-import scanFacePhoto from "../../../public/images/gg.webp";
+import { BirthdayScene, ScanSmileScene, type Scene } from "@/components/brand/scenes";
 import styles from "./landing.module.css";
 
 type Surprise =
   | { kind: "message"; list: string; text: string; sub: string }
-  | { kind: "photo"; list: string; text: string; image: StaticImageData }
+  | { kind: "photo"; list: string; text: string; Scene: Scene }
   | { kind: "link"; list: string; text: string; sub: string };
 
 // Sample scans: the real page picks one item from the list at random.
 const surprises: Surprise[] = [
   { kind: "message", list: "Mom's 60th", text: "Everything good in me started with you.", sub: "— with love, from all of us" },
-  { kind: "photo", list: "Our anniversary", text: "best. birthday. ever.", image: birthdayPhoto },
+  { kind: "photo", list: "Our anniversary", text: "best. birthday. ever.", Scene: BirthdayScene },
   { kind: "link", list: "Our anniversary", text: "The song from our first dance", sub: "youtube.com" },
   { kind: "message", list: "Long distance", text: "Look up. I am probably smiling at you right now.", sub: "— see you in 12 days" },
-  { kind: "photo", list: "Just because", text: "your face when you scanned this", image: scanFacePhoto },
+  { kind: "photo", list: "Just because", text: "your face when you scanned this", Scene: ScanSmileScene },
   { kind: "link", list: "Just because", text: "A playlist for your drive home", sub: "open.spotify.com" },
 ];
 
@@ -136,12 +134,7 @@ function DemoCard({ surprise }: { surprise: Surprise }) {
   if (surprise.kind === "photo") {
     return (
       <div className="mx-auto w-fit rotate-2 rounded-[10px] bg-white px-3 pb-4 pt-3 shadow-[0_24px_40px_-18px_rgba(35,20,46,.6)]">
-        <Image
-          src={surprise.image}
-          alt={surprise.text}
-          className="block h-[280px] w-[236px] rounded-md object-cover"
-          sizes="236px"
-        />
+        <surprise.Scene className="block h-[280px] w-[236px] rounded-md" label={surprise.text} />
         <span className="mt-2 block text-center font-hand text-[26px] font-bold">{surprise.text}</span>
       </div>
     );

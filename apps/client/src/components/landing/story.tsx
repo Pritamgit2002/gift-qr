@@ -1,18 +1,17 @@
-import Image from "next/image";
 import { Heart } from "@/components/brand/art";
-import momentPhoto from "../../../public/images/pp.jpg";
+import { StoryScene } from "@/components/brand/scenes";
 
 export function Story() {
   return (
     <section id="story" className="bg-blush py-20">
       <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-14 px-4 sm:px-8">
         <div className="scroll-pop relative min-w-0 flex-[1_1_440px]">
-          <Image
-            src={momentPhoto}
-            alt="A woman photographing a moment at home"
-            className="block h-[440px] w-full rounded-[200px_200px_36px_36px] border-2 border-plum object-cover"
-            sizes="(max-width: 960px) 100vw, 560px"
-          />
+          <div className="h-[320px] w-full overflow-hidden rounded-[200px_200px_36px_36px] border-2 border-plum sm:h-[440px]">
+            <StoryScene
+              className="block h-full w-full"
+              label="Someone scans the QR code on a gift tag with their phone, and hearts float up from the box"
+            />
+          </div>
           <div className="absolute -bottom-[30px] -right-2.5 grid h-[150px] w-[150px] place-items-center rounded-full border-2 border-plum bg-gold">
             <svg viewBox="0 0 150 150" width="150" height="150" aria-hidden="true" className="absolute inset-0 animate-spin-slow">
               <defs>

@@ -7,6 +7,8 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
+  // Absolute base for the share image and icons. Set SITE_URL in production.
+  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
   title: "GiftQR: wrap your love in a QR code",
   description:
     "Pack one QR code with songs, notes and photos. Every scan unwraps a different surprise.",
