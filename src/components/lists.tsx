@@ -21,10 +21,10 @@ import {
   ImageDownIcon,
   X,
   Eye,
-  DollarSignIcon,
   DollarSign,
+  MessageSquare,
+  Trash2,
 } from "lucide-react";
-import { MdOutlineMessage } from "react-icons/md";
 import { getUser } from "../../action/get-user";
 import { useLists } from "@/hooks/useLists";
 import Image from "next/image";
@@ -38,15 +38,10 @@ import {
 } from "./ui/tooltip";
 import { getListByName } from "../../action/get-list-by-name";
 import { toast } from "sonner";
-import { FaLink, FaMessage } from "react-icons/fa6";
-import { GoTrash } from "react-icons/go";
 import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { auth } from "../../auth";
 import { IUser } from "@/models/user";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { list } from "postcss";
-import { IList } from "@/models/list";
 import { AddMoreList } from "./add-more-list";
 
 type ListProps = {
@@ -65,7 +60,6 @@ const Lists = (data: ListProps) => {
 
   useEffect(() => {
     const getUserSession = async () => {
-      console.log(data.ownerEmail);
       const user = await getUser({
         email: data.ownerEmail,
         type: data.ownerType,
@@ -100,7 +94,6 @@ const Lists = (data: ListProps) => {
     fileInputRef,
     previewImage,
     imageName,
-    loading,
     handleDialogClose,
     handleImageChange,
     handleImageUpload,
@@ -129,20 +122,15 @@ const Lists = (data: ListProps) => {
         return;
       }
 
-      console.log("syska");
-
       if (
         listData.data.images?.length +
           listData.data.links?.length +
           listData.data.messages?.length <
         5
       ) {
-        console.log("syska-listData", listData);
         toast.error("Atleast there must be 5 items in the list to proceed");
         return;
       }
-
-      console.log("oreo");
 
       if (listData.data.paid) {
         toast.error("List is already paid...");
@@ -163,9 +151,7 @@ const Lists = (data: ListProps) => {
         return;
       }
 
-      const res = await handlePayment(listName, isPaid, ownwerEmail, ownerType);
-
-      return;
+      await handlePayment(listName, isPaid, ownwerEmail, ownerType);
     } catch (error) {
       toast.error("An error occurred while paying for the list, Try Again.");
     }
@@ -208,7 +194,6 @@ const Lists = (data: ListProps) => {
           listData?.data?.messages.length +
           listData?.data?.images?.length * 2
       );
-      console.log(totalPrice.toString);
     } catch (error) {
       console.error("QR Code Generation Error:", error);
     }
@@ -323,7 +308,7 @@ const Lists = (data: ListProps) => {
                       <Dialog>
                         <DialogTrigger>
                           <Button size="icon" variant="ghost" className="group">
-                            <GoTrash className="w-5 h-5 text-gray-600 group-hover:text-red-600" />
+                            <Trash2 className="w-5 h-5 text-gray-600 group-hover:text-red-600" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
@@ -364,7 +349,7 @@ const Lists = (data: ListProps) => {
                 {/* link input */}
                 <Dialog>
                   <DialogTrigger className="text-gray-700 p-2">
-                    <FaLink />
+                    <LinkIcon className="w-4 h-4" />
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -403,7 +388,7 @@ const Lists = (data: ListProps) => {
                 {/* message input */}
                 <Dialog>
                   <DialogTrigger className="text-gray-700 p-2">
-                    <MdOutlineMessage />
+                    <MessageSquare className="w-4 h-4" />
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -521,7 +506,7 @@ const Lists = (data: ListProps) => {
                         onClick={() => removeLink(list.name, link)}
                         className="text-gray-600 group"
                       >
-                        <GoTrash className="w-4 h-4 text-gray-600 group-hover:text-red-600 " />
+                        <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-red-600 " />
                       </Button>
                     </Card>
                   ))}
@@ -542,7 +527,7 @@ const Lists = (data: ListProps) => {
                         onClick={() => removeMessage(list.name, message)}
                         className="text-gray-600 group"
                       >
-                        <GoTrash className="w-4 h-4 text-gray-600 group-hover:text-red-600 " />
+                        <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-red-600 " />
                       </Button>
                     </Card>
                   ))}
@@ -591,7 +576,7 @@ const Lists = (data: ListProps) => {
                             className="text-gray-600 group"
                             onClick={() => handleDeleteImage(list.name, item)}
                           >
-                            <GoTrash className="w-4 h-4 text-gray-600 group-hover:text-red-600" />
+                            <Trash2 className="w-4 h-4 text-gray-600 group-hover:text-red-600" />
                           </Button>
                         </div>
                       </Card>

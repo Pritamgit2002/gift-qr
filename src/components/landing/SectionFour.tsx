@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Button } from "../ui/button";
 
 export const SectionFour = () => {
@@ -11,8 +12,8 @@ export const SectionFour = () => {
             Now Get Started with the Gift Qr
           </span>
           <div className="mt-16">
-            <Button className="bg-gradient-to-r from-yellow-500 to-red-500 text-white hover:from-red-500 hover:to-yellow-500 font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition-all duration-500 ease-in-out text-lg font-serif">
-              Get Started
+            <Button asChild className="bg-gradient-to-r from-yellow-500 to-red-500 text-white hover:from-red-500 hover:to-yellow-500 font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition-all duration-500 ease-in-out text-lg font-serif">
+              <Link href="/form">Get Started</Link>
             </Button>
           </div>
         </div>

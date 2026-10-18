@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -19,14 +18,12 @@ import {
   Loader2,
   MessageSquare,
   Plus,
+  Trash2,
   X,
 } from "lucide-react";
-import { FaLink } from "react-icons/fa6";
 import { Input } from "./ui/input";
-import { MdOutlineMessage } from "react-icons/md";
 import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { GoTrash } from "react-icons/go";
 import { Card } from "./ui/card";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,8 +45,6 @@ export const AddMoreList = ({
   const [ownerName, setOwnerName] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeDialog, setActiveDialog] = useState<string | null>(null);
-  // Add a local payment processing state
-  const [localProcessingPayment, setLocalProcessingPayment] = useState(false);
 
   useEffect(() => {
     async function getUserData() {
@@ -169,7 +164,6 @@ export const AddMoreList = ({
 
   // Determine if we should show payment processing based on either the hook state or our local state
   const showPaymentProcessing = isProcessingPayment;
-  console.log("showPaymentProcessing", showPaymentProcessing);
 
   return (
     <div className="mt-6 ">
@@ -215,7 +209,7 @@ export const AddMoreList = ({
                       variant="outline"
                       className="text-indigo-700 border-indigo-300 hover:bg-indigo-50 transition-all flex-1 md:flex-none"
                     >
-                      <FaLink className="mr-2" />
+                      <LinkIcon className="w-4 h-4 mr-2" />
                       Add Link
                     </Button>
                   </DialogTrigger>
@@ -264,7 +258,7 @@ export const AddMoreList = ({
                       variant="outline"
                       className="text-emerald-700 border-emerald-300 hover:bg-emerald-50 transition-all flex-1 md:flex-none"
                     >
-                      <MdOutlineMessage className="mr-2" />
+                      <MessageSquare className="w-4 h-4 mr-2" />
                       Add Message
                     </Button>
                   </DialogTrigger>
@@ -430,7 +424,7 @@ export const AddMoreList = ({
                             className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border-l-4 border-indigo-500 hover:shadow-md transition-all w-auto "
                           >
                             <div className="flex items-center space-x-2 flex-grow overflow-hidden">
-                              <FaLink className="text-indigo-600 flex-shrink-0" />
+                              <LinkIcon className="w-4 h-4 text-indigo-600 flex-shrink-0" />
                               <span className="text-sm truncate">{item}</span>
                             </div>
                             <Button
@@ -440,7 +434,7 @@ export const AddMoreList = ({
                               onClick={() => handleLinkDelete(listName, item)}
                               disabled={isDeletingItem}
                             >
-                              <GoTrash className="w-4 h-4 group-hover:text-red-600" />
+                              <Trash2 className="w-4 h-4 group-hover:text-red-600" />
                             </Button>
                           </Card>
                         )
@@ -473,7 +467,7 @@ export const AddMoreList = ({
                             className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border-l-4 border-emerald-500 hover:shadow-md transition-all"
                           >
                             <div className="flex items-center space-x-2 flex-grow overflow-hidden">
-                              <MdOutlineMessage className="text-emerald-600 flex-shrink-0" />
+                              <MessageSquare className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                               <span className="text-sm truncate">{item}</span>
                             </div>
                             <Button
@@ -485,7 +479,7 @@ export const AddMoreList = ({
                               }
                               disabled={isDeletingItem}
                             >
-                              <GoTrash className="w-4 h-4 group-hover:text-red-600" />
+                              <Trash2 className="w-4 h-4 group-hover:text-red-600" />
                             </Button>
                           </Card>
                         )
@@ -547,7 +541,7 @@ export const AddMoreList = ({
                             }
                             disabled={isDeletingItem}
                           >
-                            <GoTrash className="w-4 h-4 group-hover:text-red-600" />
+                            <Trash2 className="w-4 h-4 group-hover:text-red-600" />
                           </Button>
                         </div>
                       </Card>

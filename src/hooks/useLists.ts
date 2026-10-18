@@ -52,10 +52,8 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("🔥 useEffect triggered with isUpdatedAt =", isUpdatedAt);
 
     const fetchLists = async () => {
-      console.log("Fetching lists...");
       setIsLoadingLists(true);
       setError(null);
 
@@ -63,7 +61,6 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         const response = await getLists({ email: userEmail });
         if (response.success) {
           setLists(response.data || []);
-          console.log("Fetched lists:", response.data);
         } else {
           toast.error("Failed to load lists");
           setError("Failed to load lists");
@@ -193,7 +190,6 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         toast.success("Image uploaded successfully!");
         setLists(updatedLists);
       }
-      console.log("pro");
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error("Error uploading image");
@@ -365,7 +361,6 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
 
     if (list) {
       if (userType === "guest") {
-        console.log("Guest user list size validation");
         const totalLinks = list.links.length + (isMessage ? 0 : 1);
         const totalMessages = list.messages.length + (isMessage ? 1 : 0);
 
@@ -406,7 +401,6 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         messages: isMessage ? [trimmedContent] : [],
         isPaid: userType === "guest" ? true : false,
       };
-      console.log("Guest user payload", payload);
 
       const response = await AddList(payload);
 
@@ -544,13 +538,9 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
           (acc, curr) => acc + curr.updatedAt,
           0
         );
-        console.log("Previous:", isUpdatedAt);
-        console.log("New:", latestUpdateTime);
 
         if (latestUpdateTime !== isUpdatedAt) {
           setIsUpdatedAt(latestUpdateTime);
-        } else {
-          console.log("No change in updated time");
         }
       }
     } catch (error) {
@@ -597,24 +587,13 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         return;
       }
 
-      console.log("hello");
-      console.log(listData.data.paid);
-      console.log(listData.data.links.length);
-      console.log(listData.data.messages.length);
-      console.log(
-        "yopooooo, ",
-        listData.data.images?.map((image) => image.imageName).length || 0
-      );
-
       const totalItem =
         listData.data.links.length +
         listData.data.messages.length +
         ((listData.data.images &&
           listData.data.images?.map((image) => image.imageName).length) ||
           0);
-      console.log("totalItem", totalItem);
       if (totalItem < 5) {
-        console.log("hello total Item");
         toast.error(
           "At least there must be 5 items in the list to proceed...star"
         );
@@ -627,15 +606,11 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         listData.data.messages.length +
         (listData.data.images?.map((image) => image.imageName).length || 0) * 2;
 
-      console.log("totalPrice", totalPrice);
-
       if (totalPrice <= 5) {
         toast.error("Price must be greater than Five Rupees");
         setIsProcessingPayment(false);
         return;
       }
-
-      console.log("Pro Star");
 
       // Load Razorpay script
       const res = await loadScript(
@@ -723,10 +698,7 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
                 orderId: razorpayResponse.razorpay_order_id,
               });
 
-              console.log("dbUpdateResponse", dbUpdateResponse);
-
               if (dbUpdateResponse.success) {
-                console.log("Response: ", dbUpdateResponse.data);
                 toast.success(dbUpdateResponse.message);
                 setIsPaid(true);
               } else {

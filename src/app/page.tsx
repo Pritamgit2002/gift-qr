@@ -8,10 +8,9 @@ import { SectionTwo } from "@/components/landing/sectionTwo";
 import SectionThree from "@/components/landing/SectionThree";
 import { SectionFour } from "@/components/landing/SectionFour";
 import { SectionFive } from "@/components/landing/SectionFive";
-import { SectionSix } from "@/components/landing/SectionSix";
 
 const Home = () => {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -27,7 +26,6 @@ const Home = () => {
       <SectionThree />
       <SectionFour />
       <SectionFive />
-      <SectionSix />
       <AuthButtons />
     </div>
   );

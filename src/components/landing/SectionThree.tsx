@@ -52,9 +52,11 @@ const SectionThree = () => {
         {/* Left side - Image column (on desktop) */}
         <div className="w-full md:w-1/2 mb-8 md:mb-0 flex items-center justify-center">
           <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-2xl">
-            <img
-              src="/api/placeholder/600/600"
+            <Image
+              src="/images/process.jpg"
               alt="Process visualization"
+              width={600}
+              height={600}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end">

@@ -8,7 +8,7 @@ import { useEffect } from "react"
 
 export default function AuthForm() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { status } = useSession()
 
   // If user is already authenticated, redirect to home
   useEffect(() => {

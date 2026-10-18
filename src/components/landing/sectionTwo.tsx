@@ -1,7 +1,6 @@
 import Image from "next/image";
 import React from "react";
 
-type Props = {};
 const arr = [
   "/images/one.webp",
   "/images/two.jpg",
@@ -11,7 +10,7 @@ const arr = [
   "/images/six.jpg",
 ];
 
-export const SectionTwo = (props: Props) => {
+export const SectionTwo = () => {
   return (
     <div className="flex flex-col items-center justify-start pt-24 md:pt-40 bg-[#fff9f9] w-full min-h-screen">
       <div className="space-y-4 px-4 text-center">
@@ -19,9 +18,9 @@ export const SectionTwo = (props: Props) => {
           Share Joy with Personalized Qr
         </span>
         <p className="text-base md:text-lg leading-snug text-gray-700 max-w-xl mx-auto">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Officia
-          incidunt veritatis et cupiditate labore natus aspernatur cumque, minus
-          doloribus blanditiis adipisci eos fugiat dicta tempore.
+          Fill a QR code with songs, videos, notes and photos. Every scan
+          reveals a different surprise, so your gift keeps giving long after
+          it&apos;s unwrapped.
         </p>
       </div>
 

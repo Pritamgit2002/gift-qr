@@ -1,13 +1,14 @@
 // fonts/index.tsx
-import { Inter } from "next/font/google";
+import { Poppins, Rubik } from "next/font/google";
 
-export const inter = Inter({
+export const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-poppins",
   display: "swap",
 });
 
-export const rubik = Inter({
+export const rubik = Rubik({
   subsets: ["latin"],
   variable: "--font-rubik",
   display: "swap",

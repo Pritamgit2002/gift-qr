@@ -33,7 +33,7 @@ export const useDraft = ({
   }>({});
 
   // Loading states
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading] = useState<boolean>(false);
   const [isFetchingDraft, setIsFetchingDraft] = useState<boolean>(false);
   const [isAddingItem, setIsAddingItem] = useState<boolean>(false);
   const [isAddingImage, setIsAddingImage] = useState<boolean>(false);
@@ -73,7 +73,6 @@ export const useDraft = ({
             },
           });
           setDraftPaymentStatus(response.data.status);
-          console.log("response.data.images", response.data.images);
         }
       } catch (error) {
         toast.error("Failed to fetch draft data.");
@@ -157,13 +156,10 @@ export const useDraft = ({
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
 
-    console.log("file", file.name);
     const formattedName = file.name.split(".").slice(0, -1).join(".");
     setPreviewImage(URL.createObjectURL(file));
-    console.log("formattedName", formattedName);
     setMoreItemImage(file);
     setImageName(formattedName);
-    console.log("imageName", imageName);
   };
 
   const handleClickAddMoreImages = async (listName: string) => {
@@ -305,7 +301,6 @@ export const useDraft = ({
   };
 
   const handleDraftPayment = async (listName: string, ownerEmail: string) => {
-    console.log("handleDraftPayment");
     try {
       setIsProcessingPayment(true);
       const response = await fetchDraftByName({
@@ -320,17 +315,11 @@ export const useDraft = ({
         return { success: false };
       }
 
-      console.log("response.data pro", response.data.links);
-      {
-        response.data.images &&
-          console.log("response pro", listName, response.data.images);
-      }
       const total =
         (response.data.images?.length || 0) * 2 +
         (response.data.links?.length || 0) +
         (response.data.messages?.length || 0);
 
-      console.log("Calculated totalPrice:", total);
       setTotalPrice(total);
 
       const res = await loadScript(
@@ -345,7 +334,6 @@ export const useDraft = ({
         return { success: false };
       }
 
-      console.log("totalPrice", total);
       const orderResponse = await fetch("/api/create-order", {
         method: "POST",
         headers: {
@@ -399,7 +387,6 @@ export const useDraft = ({
               const verifyData = await verifyResponse.json();
               if (verifyData.success) {
                 // Update list as paid in your database
-                console.log("Response: ", verifyData.data);
                 const listUpdateResponse = await addDraftToList({
                   ownerEmail: ownerEmail,
                   listName: listName,

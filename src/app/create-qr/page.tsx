@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -18,13 +18,6 @@ export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
   const hasRun = useRef(false);
-
-  const [isGuest, setIsGuest] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("guest") === "true";
-    }
-    return false;
-  });
 
   useEffect(() => {
     const addUserToDB = async () => {
@@ -80,13 +73,13 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#fdfbfb] via-[#ebedee] to-[#dfe9f3] text-gray-900 p-6 font-[Poppins]"
+      className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#fdfbfb] via-[#ebedee] to-[#dfe9f3] text-gray-900 p-6"
     >
       <motion.h1
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="text-4xl md:text-6xl font-extrabold text-center mb-8 drop-shadow-lg font-[Rubik] text-gray-800"
+        className="text-4xl md:text-6xl font-extrabold text-center mb-8 drop-shadow-lg font-display text-gray-800"
       >
         Welcome to GiftQR
       </motion.h1>

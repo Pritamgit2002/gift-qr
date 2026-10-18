@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 import { Button } from "../ui/button";
 
@@ -7,10 +8,7 @@ export const LandingPage = () => {
     <div className="w-full bg-[#fff9f9] pt-16 px-4 md:px-12 lg:px-16">
       <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-10">
         {/* Left Content */}
-        <div
-          className="w-full md:w-1/2 flex flex-col items-start justify-center gap-6"
-          style={{ fontFamily: "Rubik" }}
-        >
+        <div className="w-full md:w-1/2 flex flex-col items-start justify-center gap-6 font-display">
           <div className=" w-96 space-y-4 text-center md:text-left">
             <h1 className="text-3xl md:text-5xl font-semibold leading-tight">
               Make Gifting Fun and Easy
@@ -26,8 +24,8 @@ export const LandingPage = () => {
               every moment special.
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-yellow-500 to-red-500 text-white hover:from-red-500 hover:to-yellow-500 font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition-all duration-500 ease-in-out text-lg font-serif">
-            Get Started
+          <Button asChild className="bg-gradient-to-r from-yellow-500 to-red-500 text-white hover:from-red-500 hover:to-yellow-500 font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition-all duration-500 ease-in-out text-lg font-serif">
+            <Link href="/form">Get Started</Link>
           </Button>
           <Image
             src="/images/gg.webp"
