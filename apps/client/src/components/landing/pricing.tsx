@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { ITEM_PRICES, MIN_LIST_PRICE } from "@giftqr/shared";
+import { ITEM_PRICES, MIN_LIST_ITEMS } from "@giftqr/shared";
 import { cn } from "@/lib/utils";
 import { PriceCalculator } from "./price-calculator";
 import styles from "./landing.module.css";
@@ -20,8 +20,7 @@ export function Pricing({ startHref }: { startHref: string }) {
             Pay only for what you pack.
           </h2>
           <p className="scroll-rise-2 m-0 max-w-[480px] text-[19px] leading-relaxed text-plum-body">
-            No plans, no subscriptions. A list unlocks its QR code once it has at least five items and comes to more
-            than ₹{MIN_LIST_PRICE}.
+            No plans, no subscriptions. Each list needs at least {MIN_LIST_ITEMS} items before its QR code unlocks.
           </p>
           <div className="scroll-rise-3 flex flex-wrap gap-3.5">
             {chips.map((chip) => (

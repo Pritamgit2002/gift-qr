@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { ITEM_PRICES, MIN_LIST_ITEMS, MIN_LIST_PRICE } from "@giftqr/shared";
+import { ITEM_PRICES, MIN_LIST_ITEMS } from "@giftqr/shared";
 import styles from "./landing.module.css";
 
 const questions = [
@@ -17,7 +17,7 @@ const questions = [
   },
   {
     q: "What's the minimum?",
-    a: `${MIN_LIST_ITEMS} items per list, and a total over ₹${MIN_LIST_PRICE}. Links and messages are ₹${ITEM_PRICES.link} each, photos are ₹${ITEM_PRICES.image}.`,
+    a: `${MIN_LIST_ITEMS} items per list. Links and messages are ₹${ITEM_PRICES.link} each, photos are ₹${ITEM_PRICES.image}.`,
   },
 ];
 

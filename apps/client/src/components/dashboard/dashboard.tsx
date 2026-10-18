@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { Loader2, Plus } from "lucide-react";
-import { ITEM_PRICES, MIN_LIST_ITEMS, MIN_LIST_PRICE, type PaymentTarget, type SessionUser } from "@giftqr/shared";
+import { ITEM_PRICES, MIN_LIST_ITEMS, type PaymentTarget, type SessionUser } from "@giftqr/shared";
 import { Logo } from "@/components/brand/logo";
 import { Sparkle } from "@/components/brand/art";
 import { buttonVariants } from "@/components/brand/button";
@@ -166,7 +166,7 @@ export function Dashboard({ user }: { user: SessionUser }) {
               <span className="text-[15px] leading-normal text-plum-body">
                 {isGuest
                   ? `Guest lists are free: up to ${GUEST_LIMITS.lists} lists, with ${GUEST_LIMITS.links} links and ${GUEST_LIMITS.messages} messages each.`
-                  : `A list unlocks with ${MIN_LIST_ITEMS} items and a total over ₹${MIN_LIST_PRICE}. Links and messages are ₹${ITEM_PRICES.link}, photos ₹${ITEM_PRICES.image}.`}
+                  : `Every list needs ${MIN_LIST_ITEMS} items to unlock. Links and messages are ₹${ITEM_PRICES.link}, photos ₹${ITEM_PRICES.image}.`}
               </span>
             </div>
           </aside>

@@ -4,10 +4,8 @@ export type PaymentTarget = "list" | "draft";
 /** Rupees charged per item. */
 export const ITEM_PRICES = { link: 1, message: 1, image: 2 } as const;
 
-/** A list can be paid for once it has at least this many items... */
+/** A list can be paid for once it has at least this many items. */
 export const MIN_LIST_ITEMS = 5;
-/** ...and costs more than this many rupees. */
-export const MIN_LIST_PRICE = 5;
 
 export type Price = {
   links: number;
@@ -41,8 +39,6 @@ export function priceOf(target: PaymentTarget, items: Items): Price {
     if (links + messages + images === 0) blocker = "Add at least one item to pay for";
   } else if (links + messages + images < MIN_LIST_ITEMS) {
     blocker = `A list needs at least ${MIN_LIST_ITEMS} items before you can pay for it`;
-  } else if (amount <= MIN_LIST_PRICE) {
-    blocker = `A list must cost more than ₹${MIN_LIST_PRICE} before you can pay for it`;
   }
   return { links, messages, images, amount, blocker };
 }
