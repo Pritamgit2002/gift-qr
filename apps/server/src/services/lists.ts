@@ -23,9 +23,11 @@ const assertOpenForItems = (list: Pick<IList, "paid" | "ownerType">) => {
   }
 };
 
+/** What a scanned QR code shows. An unpaid list keeps its items to itself. */
 export async function getList(ownerEmail: string, name: string): Promise<ListDetails> {
   const list = await lists.findOne({ ownerEmail, name });
   if (!list) throw new HttpError(404, "List not found");
+  if (!list.paid) return { name: list.name, links: [], messages: [], images: [], paid: false };
   return {
     name: list.name,
     links: list.links ?? [],

@@ -1,15 +1,26 @@
 // fonts/index.tsx
-import { Poppins, Rubik } from "next/font/google";
+import { Bricolage_Grotesque, Caveat, DM_Sans } from "next/font/google";
 
-export const poppins = Poppins({
+/** Headlines. */
+export const display = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-poppins",
+  axes: ["opsz"],
+  variable: "--font-display",
   display: "swap",
 });
 
-export const rubik = Rubik({
+/** Body copy and UI. */
+export const sans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-rubik",
+  axes: ["opsz"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+/** Handwritten notes only. */
+export const hand = Caveat({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  variable: "--font-hand",
   display: "swap",
 });

@@ -8,10 +8,10 @@ export async function middleware(request: NextRequest) {
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   })
   
-  // Public routes - allow root, all /form/* paths, and auth endpoints
+  // Public routes - allow root, the sign-in page, and auth endpoints
   if (
     request.nextUrl.pathname === '/' ||
-    request.nextUrl.pathname.startsWith('/form') ||
+    request.nextUrl.pathname.startsWith('/sign-in') ||
     request.nextUrl.pathname.startsWith('/api/auth')
   ) {
     return NextResponse.next()
@@ -19,8 +19,8 @@ export async function middleware(request: NextRequest) {
 
   // Protected routes - require authentication
   if (!token) {
-    // Redirect unauthenticated users to the form page
-    return NextResponse.redirect(new URL('/form', request.url))
+    // Redirect unauthenticated users to the sign-in page
+    return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
   return NextResponse.next()

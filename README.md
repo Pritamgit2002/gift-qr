@@ -64,7 +64,7 @@ All routes return `{ success: true, data, message }` or `{ success: false, messa
 
 | Method | Route                                   | Purpose                                |
 | ------ | --------------------------------------- | -------------------------------------- |
-| GET    | `/public/lists/:ownerEmail/:listName`   | List contents for a scanned QR code    |
+| GET    | `/public/lists/:ownerEmail/:listName`   | What a scan shows (items only once paid) |
 | GET    | `/users/me`                             | Signed-in user                         |
 | POST   | `/users/me`                             | Save the signed-in user                |
 | DELETE | `/users/me`                             | Delete the signed-in user              |

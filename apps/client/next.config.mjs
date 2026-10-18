@@ -14,6 +14,10 @@ const nextConfig = {
   async rewrites() {
     return [{ source: "/api/server/:path*", destination: `${serverUrl}/:path*` }];
   },
+  // The sign-in page used to live at /form.
+  async redirects() {
+    return [{ source: "/form", destination: "/sign-in", permanent: true }];
+  },
 };
 
 export default nextConfig;

@@ -1,15 +1,28 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+import type { CSSProperties } from "react";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { poppins, rubik } from "./fonts";
+import { display, hand, sans } from "./fonts";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "GiftQR",
+  title: "GiftQR: wrap your love in a QR code",
   description:
-    "Turn your favorite links, heartfelt messages and photos into a personalized gift QR code.",
+    "Pack one QR code with songs, notes and photos. Every scan unwraps a different surprise.",
 };
+
+export const viewport: Viewport = {
+  themeColor: "#FFF6F1",
+};
+
+// Sonner reads its colours from these variables: a plum pill, like the design's toast.
+const toastTheme = {
+  "--normal-bg": "#23142E",
+  "--normal-text": "#FFFFFF",
+  "--normal-border": "#23142E",
+  "--border-radius": "999px",
+} as CSSProperties;
 
 export default function RootLayout({
   children,
@@ -18,12 +31,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${poppins.variable} ${rubik.variable} font-sans antialiased`}
-      >
+      <body className={`${display.variable} ${sans.variable} ${hand.variable}`}>
         <AuthProvider>
           {children}
-          <Toaster />
+          <Toaster
+            position="bottom-center"
+            style={toastTheme}
+            toastOptions={{ className: "!font-sans !font-semibold !text-[15px]" }}
+          />
         </AuthProvider>
       </body>
     </html>

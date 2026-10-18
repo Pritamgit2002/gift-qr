@@ -51,6 +51,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signIn: "/sign-in",
+    error: "/sign-in",
+  },
   callbacks: {
     async jwt({ token, user, account }) {
       // If signing in for the first time, set user details

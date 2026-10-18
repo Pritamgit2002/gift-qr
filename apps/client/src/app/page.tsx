@@ -1,34 +1,39 @@
-"use client";
-import React, { useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import AuthButtons from "@/components/AuthButtons";
-import { LandingPage } from "@/components/landing/LandingPage";
-import { SectionTwo } from "@/components/landing/sectionTwo";
-import SectionThree from "@/components/landing/SectionThree";
-import { SectionFour } from "@/components/landing/SectionFour";
-import { SectionFive } from "@/components/landing/SectionFive";
+import { auth } from "../../auth";
+import { SiteHeader } from "@/components/landing/site-header";
+import { Hero } from "@/components/landing/hero";
+import { Occasions } from "@/components/landing/occasions";
+import { ScanDemo } from "@/components/landing/scan-demo";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { Gallery } from "@/components/landing/gallery";
+import { Pricing } from "@/components/landing/pricing";
+import { Story } from "@/components/landing/story";
+import { Faq } from "@/components/landing/faq";
+import { FinalCta } from "@/components/landing/final-cta";
+import { SiteFooter } from "@/components/landing/site-footer";
 
-const Home = () => {
-  const { status } = useSession();
-  const router = useRouter();
+export default async function Home() {
+  const session = await auth();
+  const signedIn = Boolean(session?.user);
+  // Signed-in visitors go straight to their lists.
+  const startHref = signedIn ? "/create-qr" : "/sign-in";
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/create-qr");
-    }
-  }, [status, router]);
-
+  // clip, not hidden: a hidden overflow makes a scroll container, and the
+  // scroll-driven reveals would then track it instead of the window.
   return (
-    <div className=" bg-[#fff9f9] max-w-6xl mx-auto flex flex-col items-center justify-center min-h-screen">
-      <LandingPage />
-      <SectionTwo />
-      <SectionThree />
-      <SectionFour />
-      <SectionFive />
-      <AuthButtons />
+    <div className="overflow-x-clip">
+      <SiteHeader signedIn={signedIn} />
+      <main>
+        <Hero startHref={startHref} />
+        <Occasions />
+        <ScanDemo />
+        <HowItWorks />
+        <Gallery />
+        <Pricing startHref={startHref} />
+        <Story />
+        <Faq />
+        <FinalCta startHref={startHref} />
+      </main>
+      <SiteFooter />
     </div>
   );
-};
-
-export default Home;
+}
