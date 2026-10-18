@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
+import { buttonVariants } from "@/components/brand/button";
+import { NoteScreen } from "@/components/brand/note-screen";
 
 export default function Error({
   error,
@@ -14,9 +17,13 @@ export default function Error({
   }, [error]);
 
   return (
-    <div>
-      <h2>Something went wrong!</h2>
-      <button onClick={() => reset()}>Try again</button>
-    </div>
+    <NoteScreen note="oops…" title="This one came unwrapped." body="Something went wrong on our side. Give it another go, or head back home.">
+      <button type="button" className={buttonVariants()} onClick={() => reset()}>
+        Try again
+      </button>
+      <Link className={buttonVariants({ variant: "ghost" })} href="/">
+        Back home
+      </Link>
+    </NoteScreen>
   );
 }

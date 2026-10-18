@@ -11,16 +11,16 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
       <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center justify-between gap-4 px-4 sm:px-8">
         <Logo />
         <nav aria-label="Main" className="hidden items-center gap-1 min-[861px]:flex">
-          <a className={navLink} href="#how">
+          <a className={navLink} href="/#how">
             How it works
           </a>
-          <a className={navLink} href="#demo">
+          <a className={navLink} href="/#demo">
             Try a scan
           </a>
-          <a className={navLink} href="#pricing">
+          <a className={navLink} href="/#pricing">
             Pricing
           </a>
-          <a className={navLink} href="#story">
+          <a className={navLink} href="/#story">
             Our story
           </a>
         </nav>
