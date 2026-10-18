@@ -13,10 +13,3 @@ export type ListSummary = ListDetails & Pick<IList, "updatedAt">;
 export type DraftDetails = Pick<IDraft, "links" | "messages" | "images" | "status">;
 
 export type UploadedImage = IImage;
-
-export type PaymentOrder = {
-  id: string;
-  amount: number | string;
-  currency: string;
-  receipt?: string;
-};

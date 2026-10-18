@@ -34,8 +34,3 @@ export const deleteListImage = (listName: string, image: IImage) =>
     method: "DELETE",
     json: { imageName: image.imageName, imageUrl: image.url },
   });
-
-export const markListPaid = (
-  listName: string,
-  payment: { price: number; paymentId: string; orderId: string }
-) => request(`/lists/${seg(listName)}/payment`, { method: "POST", json: payment });

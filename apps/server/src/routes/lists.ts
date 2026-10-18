@@ -62,14 +62,4 @@ listsRouter.delete("/:listName/images", async (req, res) => {
   res.json(ok(undefined, "Image deleted successfully"));
 });
 
-listsRouter.post("/:listName/payment", async (req, res) => {
-  await listService.markPaid(currentUser(req).email, req.params.listName, {
-    paid: req.body?.isPaid !== false,
-    price: Number(req.body?.price) || 0,
-    paymentId: requireString(req.body?.paymentId, "paymentId"),
-    orderId: requireString(req.body?.orderId, "orderId"),
-  });
-  res.json(ok(undefined, `${req.params.listName} Payment Status Updated Successfully`));
-});
-
 listsRouter.use("/:listName/draft", draftsRouter);

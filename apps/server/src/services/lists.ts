@@ -1,14 +1,27 @@
 import { nanoid } from "nanoid";
 import {
   draftNameFor,
+  priceOf,
+  type CheckoutPayment,
   type IImage,
+  type IList,
   type ListDetails,
   type ListSummary,
+  type PaymentOrder,
   type SessionUser,
 } from "@giftqr/shared";
 import { HttpError } from "../lib/http.js";
 import { drafts, lists } from "../lib/mongodb.js";
 import { deleteFromS3, uploadToS3, type UploadedFile } from "../lib/s3.js";
+import { createOrder, verifyPayment } from "./payments.js";
+
+// Guest lists are free. A user's list is locked once paid: new items go into its
+// draft, which is paid for separately.
+const assertOpenForItems = (list: Pick<IList, "paid" | "ownerType">) => {
+  if (list.paid && list.ownerType !== "guest") {
+    throw new HttpError(409, "This list is paid for. Add new items to its draft instead.");
+  }
+};
 
 export async function getList(ownerEmail: string, name: string): Promise<ListDetails> {
   const list = await lists.findOne({ ownerEmail, name });
@@ -45,6 +58,7 @@ export async function addListOrItems(
   const existing = await lists.findOne({ ownerEmail: owner.email, name });
 
   if (existing) {
+    assertOpenForItems(existing);
     await lists.updateOne(
       { _id: existing._id },
       {
@@ -106,9 +120,9 @@ export async function addImage(
   file: UploadedFile,
   imageName: string
 ): Promise<IImage> {
-  if (!(await lists.findOne({ ownerEmail, name }, { projection: { _id: 1 } }))) {
-    throw new HttpError(404, "No matching list found to update");
-  }
+  const list = await lists.findOne({ ownerEmail, name }, { projection: { paid: 1, ownerType: 1 } });
+  if (!list) throw new HttpError(404, "No matching list found to update");
+  assertOpenForItems(list);
   const image = { imageName, url: await uploadToS3(file, "images") };
   await lists.updateOne({ ownerEmail, name }, { $addToSet: { images: image } });
   return image;
@@ -126,14 +140,50 @@ export async function removeImage(ownerEmail: string, name: string, image: IImag
   }
 }
 
-export async function markPaid(
-  ownerEmail: string,
-  name: string,
-  payment: { paid: boolean; price: number; paymentId: string; orderId: string }
-) {
-  const { matchedCount } = await lists.updateOne(
-    { ownerEmail, name },
-    { $set: { ...payment, updatedAt: Date.now() } }
+/** Prices the list from its stored items and opens a Razorpay order for it. */
+export async function startCheckout(ownerEmail: string, name: string): Promise<PaymentOrder> {
+  const list = await lists.findOne({ ownerEmail, name });
+  if (!list) throw new HttpError(404, "List not found");
+  if (list.paid) throw new HttpError(409, "List is already paid");
+
+  const price = priceOf("list", list);
+  if (price.blocker) throw new HttpError(400, price.blocker);
+
+  const order = await createOrder(price.amount, { target: "list", ownerEmail, listName: name });
+  await lists.updateOne({ _id: list._id }, { $set: { pendingOrder: order } });
+  return order;
+}
+
+/** Marks the list paid, once `payment` checks out against the order stored on it. */
+export async function confirmPayment(ownerEmail: string, name: string, payment: CheckoutPayment) {
+  const list = await lists.findOne({ ownerEmail, name });
+  if (!list) throw new HttpError(404, "List not found");
+  if (list.paid) throw new HttpError(409, "List is already paid");
+  const order = list.pendingOrder;
+  if (!order) throw new HttpError(409, "No checkout in progress for this list");
+
+  const paymentId = await verifyPayment(order, payment);
+
+  // Items added after checkout started were not paid for.
+  if (priceOf("list", list).amount * 100 > order.amount) {
+    throw new HttpError(409, "The list changed after checkout started. Remove the new items and try again.");
+  }
+  // Matching the items read above means nothing was added in the meantime, and
+  // matching the order means a second confirm can't apply it again.
+  const { modifiedCount } = await lists.updateOne(
+    {
+      _id: list._id,
+      "pendingOrder.id": order.id,
+      links: list.links,
+      messages: list.messages,
+      images: list.images,
+    },
+    {
+      $set: { paid: true, price: order.amount / 100, orderId: order.id, paymentId, updatedAt: Date.now() },
+      $unset: { pendingOrder: "" },
+    }
   );
-  if (!matchedCount) throw new HttpError(404, "List not found");
+  if (!modifiedCount) {
+    throw new HttpError(409, "The list changed while confirming the payment. Please try again.");
+  }
 }

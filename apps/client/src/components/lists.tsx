@@ -40,7 +40,7 @@ import { getListByName } from "@/lib/api/lists";
 import { toast } from "sonner";
 import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { IUser } from "@giftqr/shared";
+import { priceOf, type IUser } from "@giftqr/shared";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { AddMoreList } from "./add-more-list";
 
@@ -116,13 +116,9 @@ const Lists = (data: ListProps) => {
         return;
       }
 
-      if (
-        listData.data.images?.length +
-          listData.data.links?.length +
-          listData.data.messages?.length <
-        5
-      ) {
-        toast.error("Atleast there must be 5 items in the list to proceed");
+      const { blocker } = priceOf("list", listData.data);
+      if (blocker) {
+        toast.error(blocker);
         return;
       }
 
@@ -133,15 +129,6 @@ const Lists = (data: ListProps) => {
 
       if (ownerType === "guest") {
         toast.error("Guest can not pay for a list");
-        return;
-      }
-
-      const totalItem =
-        listData.data.links.length +
-        listData.data.messages.length +
-        listData.data.images?.length;
-      if (totalItem < 5) {
-        toast.error("Atleast there must be 5 items in the list to proceed");
         return;
       }
 
@@ -180,11 +167,7 @@ const Lists = (data: ListProps) => {
       const qrData = await QRCode.toDataURL(listUrl);
       setQrCodeUrl(qrData);
       setIsDialogOpen(true);
-      setTotalPrice(
-        listData?.data?.links.length +
-          listData?.data?.messages.length +
-          listData?.data?.images?.length * 2
-      );
+      setTotalPrice(priceOf("list", listData.data).amount);
     } catch (error) {
       console.error("QR Code Generation Error:", error);
     }

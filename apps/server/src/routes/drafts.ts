@@ -52,8 +52,3 @@ draftsRouter.delete("/messages", async (req, res) => {
   await draftService.removeDraftMessage(currentUser(req).email, listNameOf(req), message);
   res.json(ok(undefined, "Message deleted successfully."));
 });
-
-draftsRouter.post("/merge", async (req, res) => {
-  await draftService.mergeDraft(currentUser(req).email, listNameOf(req));
-  res.json(ok(undefined, "Draft successfully added to list and deleted"));
-});

@@ -30,6 +30,7 @@ import Link from "next/link";
 import { useDraft } from "@/hooks/useDraft";
 import { useLists } from "@/hooks/useLists";
 import { getCurrentUser } from "@/lib/api/users";
+import { ITEM_PRICES, priceOf } from "@giftqr/shared";
 
 type AddMoreListProps = {
   listName: string;
@@ -148,15 +149,16 @@ export const AddMoreList = ({
     setIsProcessingPayment(false);
   };
 
-  const itemsCount = {
-    links: moreItems[listName]?.link?.length || 0,
-    messages: moreItems[listName]?.message?.length || 0,
-    images: moreItems[listName]?.image?.length || 0,
-  };
+  // The same price the server will charge for the draft
+  const price = priceOf("draft", {
+    links: moreItems[listName]?.link,
+    messages: moreItems[listName]?.message,
+    images: moreItems[listName]?.image,
+  });
+  const itemsCount = { links: price.links, messages: price.messages, images: price.images };
+  const totalPrice = price.amount;
 
   const totalItems = itemsCount.links + itemsCount.messages + itemsCount.images;
-  const totalPrice =
-    itemsCount.links + itemsCount.messages + itemsCount.images * 2;
   const hasItems = totalItems > 0;
 
   // Determine if we should show payment processing based on either the hook state or our local state
@@ -584,7 +586,7 @@ export const AddMoreList = ({
                             Links ({itemsCount.links})
                           </span>
                           <span className="font-medium">
-                            {itemsCount.links}
+                            {itemsCount.links * ITEM_PRICES.link}
                           </span>
                         </div>
                         <div className="flex justify-between">
@@ -592,15 +594,15 @@ export const AddMoreList = ({
                             Messages ({itemsCount.messages})
                           </span>
                           <span className="font-medium">
-                            {itemsCount.messages}
+                            {itemsCount.messages * ITEM_PRICES.message}
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">
-                            Images ({itemsCount.images} × 2)
+                            Images ({itemsCount.images} × {ITEM_PRICES.image})
                           </span>
                           <span className="font-medium">
-                            {itemsCount.images * 2}
+                            {itemsCount.images * ITEM_PRICES.image}
                           </span>
                         </div>
                         <div className="border-t border-gray-200 pt-2 mt-2">

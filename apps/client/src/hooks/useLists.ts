@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import type { IImage, IList, IUser } from "@giftqr/shared";
+import { priceOf, type IImage, type IList, type IUser } from "@giftqr/shared";
 import { formatUrl, isValidLink } from "@/constants";
 import {
   deleteLinkFromList,
@@ -11,11 +11,10 @@ import {
   deleteMessageFromList,
   getListByName,
   getLists,
-  markListPaid,
   saveList,
   uploadListImage,
 } from "@/lib/api/lists";
-import { createOrder, verifyPayment } from "@/lib/api/payments";
+import { confirmPayment, createOrder } from "@/lib/api/payments";
 import { loadScript } from "@/utils/razorpayScript";
 type UseListsProps = {
   userEmail: string;
@@ -547,27 +546,10 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         return;
       }
 
-      const totalItem =
-        listData.data.links.length +
-        listData.data.messages.length +
-        ((listData.data.images &&
-          listData.data.images?.map((image) => image.imageName).length) ||
-          0);
-      if (totalItem < 5) {
-        toast.error(
-          "At least there must be 5 items in the list to proceed...star"
-        );
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      const totalPrice =
-        listData.data.links.length +
-        listData.data.messages.length +
-        (listData.data.images?.map((image) => image.imageName).length || 0) * 2;
-
-      if (totalPrice <= 5) {
-        toast.error("Price must be greater than Five Rupees");
+      // The same check the server makes before it creates the order
+      const { blocker } = priceOf("list", listData.data);
+      if (blocker) {
+        toast.error(blocker);
         setIsProcessingPayment(false);
         return;
       }
@@ -585,20 +567,11 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
         return;
       }
 
-      // Create order on the server
-      const orderData = await createOrder({
-        amount: totalPrice,
-        currency: "INR",
-        receipt: `receipt_order_${Date.now()}`,
-        notes: {
-          listName: listName,
-          userEmail: userEmail,
-          ownerType: ownerType,
-        },
-      });
+      // Create order on the server, which prices the list it has stored
+      const orderData = await createOrder(listName, "list");
 
       if (!orderData.success) {
-        toast.error("Could not create order. Please try again.");
+        toast.error(orderData.message || "Could not create order. Please try again.");
         setIsProcessingPayment(false);
         return;
       }
@@ -606,37 +579,27 @@ export const useLists = ({ userEmail, userName, userType }: UseListsProps) => {
       // Configure Razorpay options
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID,
-        amount: totalPrice * 100,
-        currency: "INR",
+        amount: orderData.data.amount,
+        currency: orderData.data.currency,
         name: "Gift Qr",
         description: `Payment for list: ${listName}`,
         order_id: orderData.data.id,
         handler: async function (razorpayResponse: any) {
-          // Verify payment on your server
+          // The server verifies the payment, then marks the list paid
           try {
-            const verifyData = await verifyPayment({
+            const confirmData = await confirmPayment(listName, "list", {
               razorpay_order_id: razorpayResponse.razorpay_order_id,
               razorpay_payment_id: razorpayResponse.razorpay_payment_id,
               razorpay_signature: razorpayResponse.razorpay_signature,
             });
 
-            if (verifyData.success) {
-              // Update list as paid in your database
-              const dbUpdateResponse = await markListPaid(listName, {
-                price: totalPrice,
-                paymentId: razorpayResponse.razorpay_payment_id,
-                orderId: razorpayResponse.razorpay_order_id,
-              });
-
-              if (dbUpdateResponse.success) {
-                toast.success(dbUpdateResponse.message);
-                setIsPaid(true);
-              } else {
-                toast.error(dbUpdateResponse.message);
-              }
+            if (confirmData.success) {
+              toast.success(confirmData.message);
+              setIsPaid(true);
             } else {
               toast.error(
-                "Payment verification failed. Please contact support."
+                confirmData.message ||
+                  "Payment verification failed. Please contact support."
               );
             }
           } catch (error) {

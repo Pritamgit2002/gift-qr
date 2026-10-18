@@ -1,4 +1,5 @@
 import type { IImage } from "./list.js";
+import type { PaymentOrder } from "./payment.js";
 
 export type DraftStatus = "paid" | "unpaid";
 
@@ -13,6 +14,8 @@ export type IDraft = {
   links: string[];
   messages: string[];
   images: IImage[];
+  /** The checkout started for these items and not confirmed yet. */
+  pendingOrder?: PaymentOrder;
   createdAt: number;
   updatedAt: number;
 };

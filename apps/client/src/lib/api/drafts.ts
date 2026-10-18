@@ -25,7 +25,3 @@ export const deleteDraftLink = (listName: string, link: string) =>
 
 export const deleteDraftMessage = (listName: string, message: string) =>
   request(`${draftPath(listName)}/messages`, { method: "DELETE", json: { message } });
-
-/** Moves the paid-for draft items into the list. */
-export const mergeDraftIntoList = (listName: string) =>
-  request(`${draftPath(listName)}/merge`, { method: "POST" });

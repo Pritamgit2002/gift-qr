@@ -1,6 +1,6 @@
 "use client";
 
-import type { IImage } from "@giftqr/shared";
+import { priceOf, type IImage } from "@giftqr/shared";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -8,11 +8,10 @@ import {
   deleteDraftLink,
   deleteDraftMessage,
   getDraft,
-  mergeDraftIntoList,
   saveDraftItems,
   uploadDraftImage,
 } from "@/lib/api/drafts";
-import { createOrder, verifyPayment } from "@/lib/api/payments";
+import { confirmPayment, createOrder } from "@/lib/api/payments";
 import { loadScript } from "@/utils/razorpayScript";
 import { formatUrl, isValidLink } from "@/constants";
 
@@ -288,12 +287,15 @@ export const useDraft = ({
         return { success: false };
       }
 
-      const total =
-        (response.data.images?.length || 0) * 2 +
-        (response.data.links?.length || 0) +
-        (response.data.messages?.length || 0);
+      // The same price and check the server uses for the order
+      const price = priceOf("draft", response.data);
+      setTotalPrice(price.amount);
 
-      setTotalPrice(total);
+      if (price.blocker) {
+        toast.error(price.blocker);
+        setIsProcessingPayment(false);
+        return { success: false };
+      }
 
       const res = await loadScript(
         "https://checkout.razorpay.com/v1/checkout.js"
@@ -307,19 +309,10 @@ export const useDraft = ({
         return { success: false };
       }
 
-      const orderData = await createOrder({
-        amount: total,
-        currency: "INR",
-        receipt: `receipt_order_${Date.now()}`,
-        notes: {
-          listName: listName,
-          draftName: "draft_" + listName,
-          userEmail: ownerEmail,
-        },
-      });
+      const orderData = await createOrder(listName, "draft");
 
       if (!orderData.success) {
-        toast.error("Could not create order. Please try again.");
+        toast.error(orderData.message || "Could not create order. Please try again.");
         setIsProcessingPayment(false);
         return { success: false };
       }
@@ -329,34 +322,27 @@ export const useDraft = ({
         // Configure Razorpay options
         const options = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID,
-          amount: totalPrice * 100,
-          currency: "INR",
+          amount: orderData.data.amount,
+          currency: orderData.data.currency,
           name: "Gift Qr",
           description: `Payment for list: ${listName}`,
           order_id: orderData.data.id,
           handler: async function (razorpayResponse: any) {
             try {
-              // Verify payment on your server
-              const verifyData = await verifyPayment({
+              // The server verifies the payment, then moves the draft items into the list
+              const confirmData = await confirmPayment(listName, "draft", {
                 razorpay_order_id: razorpayResponse.razorpay_order_id,
                 razorpay_payment_id: razorpayResponse.razorpay_payment_id,
                 razorpay_signature: razorpayResponse.razorpay_signature,
               });
-              if (verifyData.success) {
-                // Update list as paid in your database
-                const listUpdateResponse = await mergeDraftIntoList(listName);
 
-                if (listUpdateResponse.success) {
-                  toast.success(listUpdateResponse.message);
-                  resolve({ success: true });
-                } else {
-                  toast.error(listUpdateResponse.message);
-                  resolve({ success: false });
-                }
-                toast.success(verifyData.message);
+              if (confirmData.success) {
+                toast.success(confirmData.message);
+                resolve({ success: true });
               } else {
                 toast.error(
-                  "Payment verification failed. Please contact support."
+                  confirmData.message ||
+                    "Payment verification failed. Please contact support."
                 );
                 resolve({ success: false });
               }
