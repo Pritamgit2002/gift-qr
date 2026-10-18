@@ -2,6 +2,8 @@ import type { SessionUser } from "@giftqr/shared";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+// Loads the module so the JWT augmentation below has something to extend.
+import type {} from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
