@@ -1,14 +1,11 @@
-import { MIN_LIST_ITEMS, MIN_LIST_PRICE, type Price } from "@giftqr/shared";
+import { MIN_LIST_ITEMS, type Price } from "@giftqr/shared";
 
 export const itemCount = (price: Price) => price.links + price.messages + price.images;
 
-/**
- * How many more ₹1 items a list needs before it can be paid for: it needs
- * MIN_LIST_ITEMS items and a total above MIN_LIST_PRICE. 0 when it is ready.
- */
+/** How many more items a list needs before it can be paid for; 0 when it is ready. */
 export function itemsMissing(price: Price): number {
   if (!price.blocker) return 0;
-  return Math.max(MIN_LIST_ITEMS - itemCount(price), MIN_LIST_PRICE + 1 - price.amount, 1);
+  return Math.max(MIN_LIST_ITEMS - itemCount(price), 1);
 }
 
 /** Progress toward unlocking, 0–100. */

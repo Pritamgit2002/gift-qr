@@ -7,7 +7,7 @@ item from the list: a link opens, a message appears, or a photo is shown.
 
 1. Sign in with Google, or as a guest (guests get up to 2 free lists).
 2. Create a list and add links, messages and images.
-3. Pay with Razorpay (₹1 per link or message, ₹2 per image; at least 5 items and more than ₹5) to unlock the QR code.
+3. Pay with Razorpay (₹1 per link or message, ₹2 per image, at least 5 items) to unlock the QR code.
 4. Share the QR code. It points to `/<owner email>/<list name>`.
 5. After paying, extra items go into a draft that is paid for separately and then merged into the list.
 
