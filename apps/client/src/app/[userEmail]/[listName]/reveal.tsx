@@ -3,14 +3,16 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUp, MessageSquare, Play } from "lucide-react";
+import { ArrowUp, MessageSquare, Mic, Play } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { AudioPlayer } from "@/components/audio/audio-player";
 import { cn } from "@/lib/utils";
 import styles from "./reveal.module.css";
 
 export type Surprise =
   | { kind: "message"; text: string }
   | { kind: "photo"; url: string; name: string }
+  | { kind: "audio"; url: string; name: string; duration?: number }
   | { kind: "link"; url: string; host: string };
 
 /** How long the link card shows before the link opens, matching its progress bar. */
@@ -166,6 +168,20 @@ function SurpriseCard({ surprise }: { surprise: Surprise }) {
         <p className={cn("m-0 max-h-[52vh] overflow-auto whitespace-pre-line break-words font-hand font-bold leading-none", size)}>
           {surprise.text}
         </p>
+      </div>
+    );
+  }
+
+  if (surprise.kind === "audio") {
+    return (
+      <div
+        className={cn(styles.cardUp, "flex w-full -rotate-1 flex-col gap-4 rounded-[32px_32px_32px_8px] border-2 border-plum bg-white px-[22px] pb-[22px] pt-[26px] shadow-hard-md")}
+      >
+        <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.1em]">
+          <Mic size={14} strokeWidth={2.5} aria-hidden="true" />A voice note for you
+        </span>
+        <p className="m-0 break-words font-hand text-[38px] font-bold leading-none">{surprise.name}</p>
+        <AudioPlayer src={surprise.url} name={surprise.name} duration={surprise.duration} />
       </div>
     );
   }

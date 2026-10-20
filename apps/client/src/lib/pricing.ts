@@ -1,6 +1,6 @@
 import { MIN_LIST_ITEMS, type Price } from "@giftqr/shared";
 
-export const itemCount = (price: Price) => price.links + price.messages + price.images;
+export const itemCount = (price: Price) => price.links + price.messages + price.images + price.audios;
 
 /** How many more items a list needs before it can be paid for; 0 when it is ready. */
 export function itemsMissing(price: Price): number {

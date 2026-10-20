@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { DraftDetails, IImage, ListSummary, SessionUser } from "@giftqr/shared";
+import type { DraftDetails, IAudio, IImage, ListSummary, SessionUser } from "@giftqr/shared";
 import { formatUrl, isValidLink } from "@/constants";
 import * as listsApi from "@/lib/api/lists";
 import * as draftsApi from "@/lib/api/drafts";
 
-export type ItemKind = "links" | "messages" | "images";
+export type ItemKind = "links" | "messages" | "images" | "audios";
 
 /** A list plus, for a paid list, the draft of items waiting to be paid for. */
 export type GiftList = ListSummary & { draft: DraftDetails | null };
@@ -17,6 +17,7 @@ export type Item = {
   key: string;
   text: string;
   image?: IImage;
+  audio?: IAudio;
   /** Sitting in the draft, not yet paid for. */
   draft: boolean;
 };
@@ -24,26 +25,40 @@ export type Item = {
 // Guests get free lists, within these limits.
 export const GUEST_LIMITS = { lists: 2, links: 2, messages: 2 } as const;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
 
-const emptyDraft = (): DraftDetails => ({ links: [], messages: [], images: [], status: "unpaid" });
+const emptyDraft = (): DraftDetails => ({ links: [], messages: [], images: [], audios: [], status: "unpaid" });
+
+type Value = string | IImage | IAudio;
 
 /** Every item of a list, the draft's last and marked as such. */
 export function itemsOf(list: GiftList, kind: ItemKind): Item[] {
-  const toItems = (values: (string | IImage)[], draft: boolean) =>
+  const toItems = (values: readonly Value[], draft: boolean) =>
     values.map((value): Item => {
-      const image = typeof value === "string" ? undefined : value;
-      const text = image ? image.imageName : (value as string);
-      return { kind, key: `${draft ? "d" : "l"}:${image?.url ?? text}`, text, image, draft };
+      const prefix = draft ? "d" : "l";
+      if (typeof value === "string") return { kind, key: `${prefix}:${value}`, text: value, draft };
+      if ("audioName" in value) return { kind, key: `${prefix}:${value.url}`, text: value.audioName, audio: value, draft };
+      return { kind, key: `${prefix}:${value.url}`, text: value.imageName, image: value, draft };
     });
-  return [...toItems(list[kind], false), ...toItems(list.draft?.[kind] ?? [], true)];
+  return [...toItems(list[kind] ?? [], false), ...toItems(list.draft?.[kind] ?? [], true)];
 }
 
 /** "Holiday photos.jpg" → "Holiday Photos" */
-const photoName = (file: File) =>
-  (file.name.replace(/\.[^.]+$/, "") || "Photo")
+const fileTitle = (file: File, fallback: string) =>
+  (file.name.replace(/\.[^.]+$/, "") || fallback)
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+
+/** How long a clip runs, read from the file itself; undefined if the browser can't tell. */
+const clipLength = (url: string) =>
+  new Promise<number | undefined>((resolve) => {
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.onloadedmetadata = () => resolve(Number.isFinite(audio.duration) ? audio.duration : undefined);
+    audio.onerror = () => resolve(undefined);
+    audio.src = url;
+  });
 
 type Result = { ok: true; message?: string } | { ok: false; message: string };
 const fail = (message: string): Result => ({ ok: false, message });
@@ -141,7 +156,7 @@ export function useGiftLists(user: SessionUser) {
     if (isGuest) return fail("Sign in with Google to add photos.");
     if (!file.type.startsWith("image/")) return fail("That file isn't an image.");
     if (file.size > MAX_PHOTO_BYTES) return fail("Photos can be up to 5 MB.");
-    const imageName = photoName(file);
+    const imageName = fileTitle(file, "Photo");
     if (itemsOf(list, "images").some((item) => item.text === imageName)) {
       return fail(`There's already a photo called "${imageName}". Rename the file and try again.`);
     }
@@ -162,7 +177,43 @@ export function useGiftLists(user: SessionUser) {
     return { ok: true, message: "Photo added" };
   }
 
+  // TODO(audio): upload to the server like photos once it stores audio. Until
+  // then a clip lives in this tab only and is gone after a reload.
+  async function addAudio(list: GiftList, file: File): Promise<Result> {
+    if (isGuest) return fail("Sign in with Google to add audio.");
+    if (!file.type.startsWith("audio/")) return fail("That file isn't audio. Try an MP3, M4A or WAV.");
+    if (file.size > MAX_AUDIO_BYTES) return fail("Audio clips can be up to 10 MB.");
+    const audioName = fileTitle(file, "Voice note");
+    if (itemsOf(list, "audios").some((item) => item.text === audioName)) {
+      return fail(`There's already a clip called "${audioName}". Rename the file and try again.`);
+    }
+
+    const url = URL.createObjectURL(file);
+    const audio: IAudio = { audioName, url, duration: await clipLength(url) };
+    if (goesToDraft(list)) {
+      update(list.name, (l) => {
+        const draft = l.draft ?? emptyDraft();
+        return { ...l, draft: { ...draft, audios: [...(draft.audios ?? []), audio], status: "unpaid" } };
+      });
+      return { ok: true, message: "Audio added to the draft (not uploaded yet)" };
+    }
+    update(list.name, (l) => ({ ...l, audios: [...(l.audios ?? []), audio], updatedAt: Date.now() }));
+    return { ok: true, message: "Audio added (not uploaded yet)" };
+  }
+
   async function removeItem(list: GiftList, item: Item): Promise<Result> {
+    if (item.audio) {
+      // Local only for now, so there is nothing to tell the server.
+      URL.revokeObjectURL(item.audio.url);
+      const keep = (audios: IAudio[] = []) => audios.filter((a) => a.url !== item.audio?.url);
+      update(list.name, (l) =>
+        item.draft
+          ? { ...l, draft: { ...(l.draft ?? emptyDraft()), audios: keep(l.draft?.audios) } }
+          : { ...l, audios: keep(l.audios) }
+      );
+      return { ok: true, message: "Removed" };
+    }
+
     let response;
     if (item.draft) {
       response =
@@ -181,15 +232,16 @@ export function useGiftLists(user: SessionUser) {
     }
     if (!response.success) return fail(response.message);
 
-    const keep = (values: (string | IImage)[]) =>
+    const keep = (values: (string | IImage)[] = []) =>
       values.filter((value) => (typeof value === "string" ? value !== item.text : value.url !== item.image?.url));
     update(list.name, (l) => {
-      if (!item.draft) return { ...l, [item.kind]: keep(l[item.kind]) };
+      const kind = item.kind as Exclude<ItemKind, "audios">;
+      if (!item.draft) return { ...l, [kind]: keep(l[kind]) };
       const draft = l.draft ?? emptyDraft();
-      return { ...l, draft: { ...draft, [item.kind]: keep(draft[item.kind]) } };
+      return { ...l, draft: { ...draft, [kind]: keep(draft[kind]) } };
     });
     return { ok: true, message: "Removed" };
   }
 
-  return { lists, loading, loadError, isGuest, reload, createList, deleteList, addText, addPhoto, removeItem };
+  return { lists, loading, loadError, isGuest, reload, createList, deleteList, addText, addPhoto, addAudio, removeItem };
 }

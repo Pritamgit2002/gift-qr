@@ -28,6 +28,9 @@ function pickSurprise(list: ListDetails): Surprise | null {
     ...links.map((url): Surprise => ({ kind: "link", url: url.href, host: url.hostname.replace(/^www\./, "") })),
     ...list.messages.map((text): Surprise => ({ kind: "message", text })),
     ...list.images.map((image): Surprise => ({ kind: "photo", url: image.url, name: image.imageName })),
+    ...(list.audios ?? []).map(
+      (audio): Surprise => ({ kind: "audio", url: audio.url, name: audio.audioName, duration: audio.duration })
+    ),
   ];
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }

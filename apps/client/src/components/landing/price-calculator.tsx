@@ -9,21 +9,23 @@ import { Sparkle } from "@/components/brand/art";
 import { itemCount, itemsMissing } from "@/lib/pricing";
 import styles from "./landing.module.css";
 
-type Kind = "links" | "messages" | "images";
+type Kind = "links" | "messages" | "images" | "audios";
 
 const rows: { kind: Kind; label: string; one: string; each: number }[] = [
   { kind: "links", label: "Links", one: "link", each: ITEM_PRICES.link },
   { kind: "messages", label: "Messages", one: "message", each: ITEM_PRICES.message },
   { kind: "images", label: "Photos", one: "photo", each: ITEM_PRICES.image },
+  { kind: "audios", label: "Audio clips", one: "audio clip", each: ITEM_PRICES.audio },
 ];
 
 /** "Pack your gift": change the counts, see what the server would charge. */
 export function PriceCalculator({ startHref }: { startHref: string }) {
-  const [counts, setCounts] = useState<Record<Kind, number>>({ links: 2, messages: 2, images: 0 });
+  const [counts, setCounts] = useState<Record<Kind, number>>({ links: 2, messages: 2, images: 0, audios: 0 });
   const price = priceOf("list", {
     links: new Array(counts.links),
     messages: new Array(counts.messages),
     images: new Array(counts.images),
+    audios: new Array(counts.audios),
   });
   const missing = itemsMissing(price);
 
@@ -48,7 +50,7 @@ export function PriceCalculator({ startHref }: { startHref: string }) {
               <button
                 className={styles.stepButton}
                 type="button"
-                aria-label={`Remove a ${row.one}`}
+                aria-label={`Remove ${row.kind === "audios" ? "an" : "a"} ${row.one}`}
                 onClick={() => bump(row.kind, -1)}
               >
                 <Minus size={16} strokeWidth={3} aria-hidden="true" />
@@ -59,7 +61,7 @@ export function PriceCalculator({ startHref }: { startHref: string }) {
               <button
                 className={styles.stepButton}
                 type="button"
-                aria-label={`Add a ${row.one}`}
+                aria-label={`Add ${row.kind === "audios" ? "an" : "a"} ${row.one}`}
                 onClick={() => bump(row.kind, 1)}
               >
                 <Plus size={16} strokeWidth={3} aria-hidden="true" />

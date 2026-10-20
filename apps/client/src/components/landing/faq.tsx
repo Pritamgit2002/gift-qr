@@ -5,7 +5,7 @@ import styles from "./landing.module.css";
 const questions = [
   {
     q: "What happens when someone scans my code?",
-    a: "GiftQR picks one item from your list at random. A link opens, a message appears on screen, or a photo is shown. Scan again and it may be something else.",
+    a: "GiftQR picks one item from your list at random. A link opens, a message appears on screen, a photo is shown, or a voice note plays, as many times as they like. Scan again and it may be something else.",
   },
   {
     q: "Can I add more after I've paid?",
@@ -17,7 +17,7 @@ const questions = [
   },
   {
     q: "What's the minimum?",
-    a: `${MIN_LIST_ITEMS} items per list. Links and messages are ₹${ITEM_PRICES.link} each, photos are ₹${ITEM_PRICES.image}.`,
+    a: `${MIN_LIST_ITEMS} items per list. Links and messages are ₹${ITEM_PRICES.link} each, photos and audio clips are ₹${ITEM_PRICES.image}.`,
   },
 ];
 

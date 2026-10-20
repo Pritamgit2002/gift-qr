@@ -7,6 +7,14 @@ export type IImage = {
   url: string;
 };
 
+/** A voice note or song the maker uploaded. */
+export type IAudio = {
+  audioName: string;
+  url: string;
+  /** Length in seconds, when known. */
+  duration?: number;
+};
+
 export type IList = {
   id: string;
   ownerEmail: IUser["email"];
@@ -16,6 +24,8 @@ export type IList = {
   links: string[];
   messages: string[];
   images: IImage[];
+  /** Not stored by the server yet; audio uploads are still to be built. */
+  audios?: IAudio[];
   paid: boolean;
   /** Set once paid: rupees paid and the Razorpay ids. */
   price?: number;

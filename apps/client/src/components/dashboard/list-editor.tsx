@@ -2,13 +2,15 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
-import { Image as ImageIcon, Link as LinkIcon, Loader2, MessageSquare, Trash2, Upload } from "lucide-react";
+import { Image as ImageIcon, Link as LinkIcon, Loader2, MessageSquare, Mic, Music, Trash2, Upload } from "lucide-react";
 import type { PaymentTarget } from "@giftqr/shared";
 import { buttonVariants } from "@/components/brand/button";
 import { cn } from "@/lib/utils";
 import { itemsOf, type GiftList, type Item, type ItemKind, type useGiftLists } from "./use-gift-lists";
 import { summarize, toneClass } from "./summary";
 import { QrPanel } from "./qr-panel";
+import { LinkBrand } from "./link-brand";
+import { AudioMini } from "@/components/audio/audio-player";
 import styles from "./dashboard.module.css";
 
 type Actions = ReturnType<typeof useGiftLists>;
@@ -17,7 +19,20 @@ const tabs: { kind: ItemKind; label: string; icon: ReactNode; mark: string }[] =
   { kind: "links", label: "Links", icon: <LinkIcon size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "L" },
   { kind: "messages", label: "Messages", icon: <MessageSquare size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "M" },
   { kind: "images", label: "Photos", icon: <ImageIcon size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "P" },
+  { kind: "audios", label: "Audio", icon: <Mic size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "A" },
 ];
+
+/** What the upload zone takes, per file tab. */
+const uploads = {
+  images: { accept: "image/*", multiple: true, noun: "Photos", idle: "Drop photos here, or click to upload", hint: null },
+  audios: {
+    accept: "audio/*",
+    multiple: true,
+    noun: "Audio clips",
+    idle: "Drop a voice note or song, or click to upload",
+    hint: "MP3, M4A or WAV · up to 10 MB",
+  },
+};
 
 const addCopy = {
   links: { label: "Add a link", placeholder: "Paste a link, e.g. open.spotify.com/…" },
@@ -80,14 +95,14 @@ export function ListEditor({
 
   const submitText = async (event: FormEvent) => {
     event.preventDefault();
-    if (tab === "images") return;
+    if (tab === "images" || tab === "audios") return;
     const kind = tab;
     if (await run("add", () => actions.addText(list, kind, text))) setText("");
   };
 
-  const uploadPhotos = async (files: FileList | null) => {
+  const uploadFiles = async (files: FileList | null) => {
     for (const file of Array.from(files ?? [])) {
-      await run("add", () => actions.addPhoto(list, file));
+      await run("add", () => (tab === "audios" ? actions.addAudio(list, file) : actions.addPhoto(list, file)));
     }
     if (fileInput.current) fileInput.current.value = "";
   };
@@ -125,9 +140,9 @@ export function ListEditor({
         </div>
       </div>
 
-      <div role="tablist" aria-label="Item type" className="flex gap-1.5 rounded-[18px] bg-paper p-1.5">
+      <div role="tablist" aria-label="Item type" className="flex flex-wrap gap-1.5 rounded-[18px] bg-paper p-1.5">
         {tabs.map((t) => {
-          const count = t.kind === "links" ? summary.links : t.kind === "messages" ? summary.messages : summary.photos;
+          const count = { links: summary.links, messages: summary.messages, images: summary.photos, audios: summary.audios }[t.kind];
           return (
             <button
               key={t.kind}
@@ -155,7 +170,7 @@ export function ListEditor({
           </p>
         )}
 
-        {tab !== "images" ? (
+        {tab === "links" || tab === "messages" ? (
           <form className="flex flex-wrap gap-2.5" onSubmit={submitText}>
             <label htmlFor={inputId} className="flex flex-[1_1_260px] flex-col gap-1.5 text-sm font-semibold">
               {addCopy[tab].label}
@@ -176,19 +191,20 @@ export function ListEditor({
           </form>
         ) : actions.isGuest ? (
           <p className="m-0 rounded-[18px] bg-shell px-5 py-6 text-center font-semibold text-ribbon-deep">
-            Photos are for Google accounts. Sign in with Google to add them.
+            {uploads[tab].noun} are for Google accounts. Sign in with Google to add them.
           </p>
         ) : (
           <>
             <input
               ref={fileInput}
               type="file"
-              accept="image/*"
-              multiple
+              key={tab}
+              accept={uploads[tab].accept}
+              multiple={uploads[tab].multiple}
               className="sr-only"
               tabIndex={-1}
               aria-hidden="true"
-              onChange={(e) => void uploadPhotos(e.target.files)}
+              onChange={(e) => void uploadFiles(e.target.files)}
             />
             <button
               type="button"
@@ -203,7 +219,7 @@ export function ListEditor({
               onDrop={(e) => {
                 e.preventDefault();
                 setDragging(false);
-                void uploadPhotos(e.dataTransfer.files);
+                void uploadFiles(e.dataTransfer.files);
               }}
             >
               {busy === "add" ? (
@@ -212,10 +228,17 @@ export function ListEditor({
                   Uploading…
                 </>
               ) : (
-                <>
-                  <Upload size={26} strokeWidth={2.4} aria-hidden="true" />
-                  Drop photos here, or click to upload
-                </>
+                <span className="flex flex-col items-center gap-1">
+                  <span className="flex items-center gap-3">
+                    {tab === "audios" ? (
+                      <Music size={26} strokeWidth={2.4} aria-hidden="true" />
+                    ) : (
+                      <Upload size={26} strokeWidth={2.4} aria-hidden="true" />
+                    )}
+                    {uploads[tab].idle}
+                  </span>
+                  {uploads[tab].hint && <span className="text-sm font-medium text-ribbon-dark">{uploads[tab].hint}</span>}
+                </span>
               )}
             </button>
           </>
@@ -224,9 +247,13 @@ export function ListEditor({
         <ul className="m-0 flex min-h-[120px] list-none flex-col gap-2.5 p-0">
           {items.map((item) => (
             <li key={item.key} className={styles.item}>
-              {item.image ? (
+              {item.audio ? (
+                <AudioMini src={item.audio.url} name={item.text} duration={item.audio.duration} />
+              ) : item.image ? (
                 // eslint-disable-next-line @next/next/no-img-element -- user photos live on S3
                 <img src={item.image.url} alt="" className="h-[52px] w-[52px] flex-none rounded-xl object-cover" />
+              ) : item.kind === "links" ? (
+                <LinkBrand link={item.text} />
               ) : (
                 <span
                   className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-shell font-extrabold text-ribbon-deep"
@@ -235,7 +262,7 @@ export function ListEditor({
                   {tabs.find((t) => t.kind === item.kind)?.mark}
                 </span>
               )}
-              <span className="min-w-0 flex-1 truncate text-base">{item.text}</span>
+              {!item.audio && <span className="min-w-0 flex-1 truncate text-base">{item.text}</span>}
               {item.draft && <span className="rounded-full bg-gold px-2.5 py-1 text-xs font-bold">draft</span>}
               <button
                 type="button"

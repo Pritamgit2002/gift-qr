@@ -166,7 +166,7 @@ export function Dashboard({ user }: { user: SessionUser }) {
               <span className="text-[15px] leading-normal text-plum-body">
                 {isGuest
                   ? `Guest lists are free: up to ${GUEST_LIMITS.lists} lists, with ${GUEST_LIMITS.links} links and ${GUEST_LIMITS.messages} messages each.`
-                  : `Every list needs ${MIN_LIST_ITEMS} items to unlock. Links and messages are ₹${ITEM_PRICES.link}, photos ₹${ITEM_PRICES.image}.`}
+                  : `Every list needs ${MIN_LIST_ITEMS} items to unlock. Links and messages are ₹${ITEM_PRICES.link}, photos and audio ₹${ITEM_PRICES.image}.`}
               </span>
             </div>
           </aside>
@@ -181,7 +181,7 @@ export function Dashboard({ user }: { user: SessionUser }) {
               >
                 <span className="font-hand text-[34px] font-bold text-ribbon-deep">your first gift starts here</span>
                 <p className="m-0 max-w-[420px] text-lg leading-relaxed text-plum-body">
-                  Name a list above, then pack it with links, messages and photos.
+                  Name a list above, then pack it with links, messages, photos and audio.
                 </p>
               </section>
             )

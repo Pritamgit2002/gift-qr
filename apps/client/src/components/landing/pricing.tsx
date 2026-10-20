@@ -5,10 +5,17 @@ import { PriceCalculator } from "./price-calculator";
 import styles from "./landing.module.css";
 
 const chips = [
-  { label: "Link", price: ITEM_PRICES.link, gold: false, tilt: 0 },
-  { label: "Message", price: ITEM_PRICES.message, gold: true, tilt: -2 },
-  { label: "Photo", price: ITEM_PRICES.image, gold: false, tilt: 0 },
-];
+  { label: "Link", price: ITEM_PRICES.link, tone: "plain", tilt: 0 },
+  { label: "Message", price: ITEM_PRICES.message, tone: "gold", tilt: -2 },
+  { label: "Photo", price: ITEM_PRICES.image, tone: "plain", tilt: 0 },
+  { label: "Audio", price: ITEM_PRICES.audio, tone: "mint", tilt: 2 },
+] as const;
+
+const chipTone = {
+  plain: { box: "bg-white", label: "text-plum-body" },
+  gold: { box: "bg-gold", label: "text-plum" },
+  mint: { box: "bg-mint", label: "text-mint-ink" },
+};
 
 export function Pricing({ startHref }: { startHref: string }) {
   return (
@@ -28,12 +35,12 @@ export function Pricing({ startHref }: { startHref: string }) {
                 key={chip.label}
                 className={cn(
                   styles.priceChip,
-                  "min-w-[130px] rounded-[20px] border-2 border-plum px-5 py-4 shadow-hard-sm",
-                  chip.gold ? "bg-gold" : "bg-white"
+                  "min-w-[108px] rounded-[20px] border-2 border-plum px-[18px] py-4 shadow-hard-sm",
+                  chipTone[chip.tone].box
                 )}
                 style={chip.tilt ? { transform: `rotate(${chip.tilt}deg)` } : undefined}
               >
-                <span className={cn("block text-sm font-semibold", chip.gold ? "text-plum" : "text-plum-body")}>
+                <span className={cn("block text-sm font-semibold", chipTone[chip.tone].label)}>
                   {chip.label}
                 </span>
                 <span className="font-display text-4xl font-extrabold">₹{chip.price}</span>
