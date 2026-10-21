@@ -11,8 +11,9 @@ import styles from "./sign-in.module.css";
 
 export const metadata = { title: "Sign in · GiftQR" };
 
-export default async function SignInPage({ searchParams }: { searchParams: { error?: string } }) {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if ((await auth())?.user) redirect("/create-qr");
+  const { error } = await searchParams;
 
   return (
     <div className="flex min-h-screen flex-wrap gap-5 bg-paper p-5">
@@ -36,7 +37,7 @@ export default async function SignInPage({ searchParams }: { searchParams: { err
             </p>
           </div>
 
-          {searchParams.error && (
+          {error && (
             <p role="alert" className="m-0 rounded-[18px] bg-peach px-[18px] py-4 font-semibold text-ribbon-dark">
               That sign-in didn&apos;t work. Please try again.
             </p>

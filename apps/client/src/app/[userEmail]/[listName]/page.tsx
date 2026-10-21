@@ -3,11 +3,11 @@ import type { ListDetails } from "@giftqr/shared";
 import { getListByName } from "@/lib/api/lists";
 import { Reveal, RevealNote, type Surprise } from "./reveal";
 
-type Params = { params: { userEmail: string; listName: string } };
+type Params = { params: Promise<{ userEmail: string; listName: string }> };
 
 // A gift is for the person holding the code, not for search engines.
-export const generateMetadata = ({ params }: Params): Metadata => ({
-  title: `${decodeURIComponent(params.listName)} · GiftQR`,
+export const generateMetadata = async ({ params }: Params): Promise<Metadata> => ({
+  title: `${decodeURIComponent((await params).listName)} · GiftQR`,
   robots: { index: false, follow: false },
 });
 
@@ -33,8 +33,9 @@ function pickSurprise(list: ListDetails): Surprise | null {
 }
 
 export default async function ScanPage({ params }: Params) {
-  const ownerEmail = decodeURIComponent(params.userEmail);
-  const listName = decodeURIComponent(params.listName);
+  const { userEmail, listName: rawListName } = await params;
+  const ownerEmail = decodeURIComponent(userEmail);
+  const listName = decodeURIComponent(rawListName);
   const response = await getListByName(ownerEmail, listName);
 
   if (!response.success) {

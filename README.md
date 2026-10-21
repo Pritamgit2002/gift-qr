@@ -15,7 +15,7 @@ item from the list: a link opens, a message appears, or a photo is shown.
 
 ```
 apps/
-  client/    Next.js 14 app: pages, UI and Google/guest sign-in (Auth.js)
+  client/    Next.js 16 app: pages, UI and Google/guest sign-in (Auth.js)
   server/    Express API: MongoDB, S3 uploads, Razorpay
 packages/
   shared/    Types and pricing shared by client and server (lists, drafts, users, API responses)
