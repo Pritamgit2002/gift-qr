@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/*
+  The "Unwrapped" look: blush paper, plum ink, ribbon red and gold, bold
+  outlines with hard offset shadows, and motion that springs a little.
+*/
+@theme {
+  --color-paper: #fff6f1;
+  --color-blush: #ffe9e0;
+  --color-peach: #ffe4da;
+  --color-shell: #fff0eb;
+
+  --color-plum: #23142e;
+  --color-plum-body: #4e3d5a;
+  --color-plum-sub: #5b4a66;
+  --color-plum-mute: #6b5a77;
+  --color-plum-mist: #d9cce3;
+  --color-plum-haze: #bfaecb;
+
+  --color-ribbon: #d6284a;
+  --color-ribbon-deep: #c21f45;
+  --color-ribbon-dark: #8f1232;
+  --color-ribbon-light: #ff5a6e;
+  --color-ribbon-lid: #e23b57;
+
+  --color-gold: #ffc23d;
+  --color-gold-soft: #fff4d6;
+  --color-gold-cream: #fff0c7;
+
+  --color-rose: #f9b8c3;
+  --color-lilac: #efe7f6;
+
+  --color-line: #ebddd6;
+  --color-line-soft: #f3e4dd;
+  --color-line-warm: #e9d6ce;
+  --color-line-dash: #d6c3ba;
+  --color-line-track: #f3d9cf;
+
+  --color-mint: #d8f3e3;
+  --color-mint-ink: #14532d;
+
+  --tracking-display: -0.025em;
+
+  --shadow-hard-sm: 4px 4px 0 #23142e;
+  --shadow-hard: 6px 6px 0 #23142e;
+  --shadow-hard-md: 8px 8px 0 #23142e;
+  --shadow-hard-lg: 10px 10px 0 #23142e;
+  --shadow-hard-xl: 14px 14px 0 #23142e;
+  --shadow-hard-gold: 6px 6px 0 #ffc23d;
+  --shadow-outline: inset 0 0 0 2px #23142e;
+  --shadow-cta: 0 12px 26px -12px rgba(214, 40, 74, 0.8), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+  --shadow-cta-hover: 0 18px 34px -12px rgba(214, 40, 74, 0.85), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+  --shadow-gold-cta: 0 12px 26px -12px rgba(255, 194, 61, 0.9), inset 0 -3px 0 rgba(0, 0, 0, 0.14);
+  --shadow-photo: 0 18px 40px -18px rgba(35, 20, 46, 0.45);
+  --shadow-photo-lg: 0 30px 50px -20px rgba(35, 20, 46, 0.5);
+  --shadow-phone: 0 40px 70px -30px rgba(35, 20, 46, 0.6);
+
+  /* Buttons, cards, chips. */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Headlines, fades, reveals. */
+  --ease-glide: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Squiggles, progress bars. */
+  --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-rise: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-sm: float-sm 5s ease-in-out infinite;
+  --animate-twinkle: twinkle 2.4s ease-in-out infinite;
+  --animate-pop-in: pop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-card-in: card-in 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-stamp: stamp 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-item-in: item-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-wobble: wobble 2.8s ease-in-out infinite;
+  --animate-spin-slow: spin 18s linear infinite;
+  --animate-bounce: bounce 1.6s ease-in-out infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  @keyframes float-sm {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes twinkle {
+    0%,
+    100% {
+      transform: scale(0.35) rotate(0);
+      opacity: 0.25;
+    }
+    50% {
+      transform: scale(1) rotate(45deg);
+      opacity: 1;
+    }
+  }
+  @keyframes pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    70% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes card-in {
+    0% {
+      opacity: 0;
+      transform: translateY(46px) scale(0.86) rotate(-4deg);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-6px) scale(1.03) rotate(1deg);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes stamp {
+    0% {
+      opacity: 0;
+      transform: scale(1.8) rotate(-12deg);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(0.94) rotate(2deg);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  @keyframes item-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-14px) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes wobble {
+    0%,
+    70%,
+    100% {
+      transform: rotate(0);
+    }
+    76% {
+      transform: rotate(-10deg);
+    }
+    82% {
+      transform: rotate(8deg);
+    }
+    88% {
+      transform: rotate(-4deg);
+    }
+  }
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+/*
+  next/font sets --next-font-* on <body>, so these are inlined where they are
+  used rather than resolved on :root, where those variables don't exist.
+*/
+@theme inline {
+  --font-display: var(--next-font-display), var(--next-font-sans), sans-serif;
+  --font-sans: var(--next-font-sans), system-ui, sans-serif;
+  --font-hand: var(--next-font-hand), cursive;
+}
+
+@layer base {
+  /* Tailwind 3 defaults this site was drawn with. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #e5e7eb;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  body {
+    @apply bg-paper font-sans text-plum antialiased;
+  }
+  ::selection {
+    background: #ffc23d;
+    color: #23142e;
+  }
+  :focus-visible {
+    outline: 3px solid #23142e;
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* Gloss sweep across the primary call to action. */
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    transform: skewX(-20deg);
+    animation: shine 3.6s 2.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* A piece of confetti falling through its (overflow-hidden) parent. */
+  .confetti-fall {
+    position: absolute;
+    top: -30px;
+    width: 10px;
+    height: 14px;
+    border-radius: 2px;
+    opacity: 0.85;
+    animation: confetti-fall linear infinite;
+  }
+
+  /* Reveal on scroll where the browser supports scroll-driven animations. */
+  @supports (animation-timeline: view()) {
+    .scroll-rise,
+    .scroll-rise-2,
+    .scroll-rise-3 {
+      animation: scroll-rise linear both;
+      animation-timeline: view();
+    }
+    .scroll-rise {
+      animation-range: entry 0% cover 28%;
+    }
+    .scroll-rise-2 {
+      animation-range: entry 8% cover 34%;
+    }
+    .scroll-rise-3 {
+      animation-range: entry 16% cover 40%;
+    }
+    .scroll-pop {
+      animation: scroll-pop linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -60%;
+  }
+  35%,
+  100% {
+    left: 130%;
+  }
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  100% {
+    transform: translateY(1000px) rotate(620deg);
+  }
+}
+@keyframes scroll-rise {
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes scroll-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Loops stop, confetti goes, and everything shows in its final state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001ms !important;
+  }
+  .confetti-fall,
+  [data-decor="motion"] {
+    display: none !important;
+  }
+}

@@ -1,0 +1,124 @@
+/* Sign-in art panel and entrance. */
+
+.cardIn {
+  animation: cardIn 0.9s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.orbit {
+  animation: spin 26s linear infinite;
+}
+/* Keeps each orbiting icon upright. */
+.counter {
+  animation: spin 26s linear infinite reverse;
+}
+.swing {
+  animation: swing 3.2s ease-in-out infinite;
+  transform-origin: 50% 0;
+}
+.pulseRing {
+  animation: pulse 2.4s ease-out infinite;
+}
+.wave {
+  display: inline-block;
+  animation: wave 2.6s 1.2s ease-in-out infinite;
+  transform-origin: 70% 80%;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  border-radius: 18px;
+  font-weight: 700;
+  font-size: 17px;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    background 0.2s;
+}
+.button:hover {
+  transform: translate(-2px, -3px);
+}
+.button:active {
+  transform: scale(0.97);
+}
+.button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+  transform: none;
+}
+.google {
+  background: #fff;
+  color: #23142e;
+  border: 2px solid #23142e;
+  box-shadow: 5px 5px 0 #23142e;
+}
+.google:hover {
+  box-shadow: 8px 8px 0 #23142e;
+}
+.guest {
+  background: #ffe4da;
+  color: #23142e;
+  border: 2px solid transparent;
+}
+.guest:hover {
+  background: #ffd6c8;
+}
+
+@keyframes cardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.94) rotate(2deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes swing {
+  0%,
+  100% {
+    transform: rotate(7deg);
+  }
+  50% {
+    transform: rotate(-7deg);
+  }
+}
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes wave {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  10%,
+  30% {
+    transform: rotate(16deg);
+  }
+  20%,
+  40% {
+    transform: rotate(-8deg);
+  }
+}
