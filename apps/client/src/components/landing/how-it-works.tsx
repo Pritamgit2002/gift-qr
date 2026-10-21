@@ -64,7 +64,7 @@ export function HowItWorks() {
               strokeLinecap="round"
             />
           </svg>
-          <div className="relative z-[1] grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
+          <div className="relative z-1 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
             <Step
               n={1}
               reveal="scroll-rise"

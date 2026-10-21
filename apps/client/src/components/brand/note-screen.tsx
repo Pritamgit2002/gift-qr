@@ -15,7 +15,7 @@ export function NoteScreen({
   children: ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-paper">
+    <div className="relative flex min-h-dvh flex-col overflow-hidden bg-paper">
       <div className="mx-auto w-full max-w-[1240px] px-4 pt-5 sm:px-8">
         <Logo />
       </div>

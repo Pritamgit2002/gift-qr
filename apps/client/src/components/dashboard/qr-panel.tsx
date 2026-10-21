@@ -160,7 +160,7 @@ function LockedCode({
     <div className="flex flex-wrap items-center gap-6">
       <div className="relative flex-none overflow-hidden rounded-[22px] border-2 border-dashed border-line-dash bg-paper p-3.5">
         <QrArt size={150} className="opacity-50 blur-[5px]" />
-        <span className="absolute left-1/2 top-1/2 -ml-[30px] -mt-[30px] grid h-[60px] w-[60px] animate-wobble place-items-center rounded-full bg-plum text-gold">
+        <span className="absolute left-1/2 top-1/2 ml-[-30px] mt-[-30px] grid h-[60px] w-[60px] animate-wobble place-items-center rounded-full bg-plum text-gold">
           <Lock size={26} strokeWidth={2.5} aria-hidden="true" />
         </span>
       </div>

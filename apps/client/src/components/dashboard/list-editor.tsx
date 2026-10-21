@@ -107,7 +107,7 @@ export function ListEditor({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <span className="text-sm font-semibold text-plum-mute">Editing</span>
-          <h2 className="m-0 break-words font-display text-[34px] font-extrabold leading-[1.05] tracking-display">{list.name}</h2>
+          <h2 className="m-0 wrap-break-word font-display text-[34px] font-extrabold leading-[1.05] tracking-display">{list.name}</h2>
         </div>
         <div className="flex items-center gap-2">
           <span className={cn("whitespace-nowrap rounded-full px-2.5 py-[5px] text-xs font-bold", toneClass[summary.tone])}>
@@ -115,7 +115,7 @@ export function ListEditor({
           </span>
           <button
             type="button"
-            className={cn(styles.iconButton, confirmDelete && "!w-auto bg-peach px-3 text-sm font-bold !text-ribbon-dark")}
+            className={cn(styles.iconButton, confirmDelete && "w-auto! bg-peach px-3 text-sm font-bold text-ribbon-dark!")}
             aria-label={confirmDelete ? `Confirm deleting ${list.name}` : `Delete ${list.name}`}
             disabled={busy === "delete"}
             onClick={deleteList}

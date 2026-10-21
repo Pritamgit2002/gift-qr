@@ -5,7 +5,7 @@ import { Bricolage_Grotesque, Caveat, DM_Sans } from "next/font/google";
 export const display = Bricolage_Grotesque({
   subsets: ["latin"],
   axes: ["opsz"],
-  variable: "--font-display",
+  variable: "--next-font-display",
   display: "swap",
 });
 
@@ -13,7 +13,7 @@ export const display = Bricolage_Grotesque({
 export const sans = DM_Sans({
   subsets: ["latin"],
   axes: ["opsz"],
-  variable: "--font-sans",
+  variable: "--next-font-sans",
   display: "swap",
 });
 
@@ -21,6 +21,6 @@ export const sans = DM_Sans({
 export const hand = Caveat({
   subsets: ["latin"],
   weight: ["500", "700"],
-  variable: "--font-hand",
+  variable: "--next-font-hand",
   display: "swap",
 });

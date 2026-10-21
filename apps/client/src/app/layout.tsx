@@ -39,7 +39,7 @@ export default function RootLayout({
           <Toaster
             position="bottom-center"
             style={toastTheme}
-            toastOptions={{ className: "!font-sans !font-semibold !text-[15px]" }}
+            toastOptions={{ className: "font-sans! font-semibold! text-[15px]!" }}
           />
         </AuthProvider>
       </body>

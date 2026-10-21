@@ -12,7 +12,7 @@ export function Story() {
               label="Someone scans the QR code on a gift tag with their phone, and hearts float up from the box"
             />
           </div>
-          <div className="absolute -bottom-[30px] -right-2.5 grid h-[150px] w-[150px] place-items-center rounded-full border-2 border-plum bg-gold">
+          <div className="absolute bottom-[-30px] -right-2.5 grid h-[150px] w-[150px] place-items-center rounded-full border-2 border-plum bg-gold">
             <svg viewBox="0 0 150 150" width="150" height="150" aria-hidden="true" className="absolute inset-0 animate-spin-slow">
               <defs>
                 <path id="story-badge-circle" d="M75 75 m -54 0 a 54 54 0 1 1 108 0 a 54 54 0 1 1 -108 0" />

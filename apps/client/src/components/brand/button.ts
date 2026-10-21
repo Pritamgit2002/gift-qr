@@ -18,8 +18,8 @@ export const buttonVariants = cva(
       size: {
         sm: "min-h-11 px-5 text-[15px]",
         md: "min-h-12 px-[22px] text-base",
-        lg: "min-h-[52px] px-[26px] text-[17px] hover:-translate-y-[3px] hover:-rotate-1 active:rotate-0",
-        xl: "min-h-[60px] px-8 text-[19px] hover:-translate-y-[3px] hover:-rotate-1 active:rotate-0",
+        lg: "min-h-[52px] px-[26px] text-[17px] hover:translate-y-[-3px] hover:-rotate-1 active:rotate-0",
+        xl: "min-h-[60px] px-8 text-[19px] hover:translate-y-[-3px] hover:-rotate-1 active:rotate-0",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },

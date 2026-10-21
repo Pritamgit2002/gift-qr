@@ -28,7 +28,7 @@ export function Occasions() {
           ))}
         </div>
       </div>
-      <div className="absolute -left-10 -right-10 top-[60px] -rotate-[2.2deg] overflow-hidden bg-plum py-[18px]">
+      <div className="absolute -left-10 -right-10 top-[60px] rotate-[-2.2deg] overflow-hidden bg-plum py-[18px]">
         <div className={`${styles.band} font-display text-3xl font-bold text-paper`}>
           {[0, 1].map((copy) => (
             <span key={copy} aria-hidden={copy === 1 || undefined}>

@@ -52,7 +52,7 @@ export function Hero({ startHref }: { startHref: string }) {
     <section id="top" className="relative pb-20 pt-10">
       <FallingConfetti pieces={confetti} />
 
-      <div className="relative z-[1] mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-10 px-4 sm:px-8">
+      <div className="relative z-1 mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-10 px-4 sm:px-8">
         <div className="flex min-w-0 flex-[1_1_480px] flex-col gap-7">
           <span
             className="inline-flex animate-rise items-center gap-2 self-start rounded-full border-2 border-plum bg-white py-2 pl-2.5 pr-4 text-sm font-semibold"
@@ -167,7 +167,7 @@ function HeroStage() {
         <div className={cn(styles.boxDrop, "absolute inset-0")}>
           <div className={cn(styles.boxHop, "absolute inset-0")}>
             {/* QR card, behind the front of the box */}
-            <div className={cn(styles.qrRise, "absolute left-[190px] top-32 z-[2] h-[214px] w-[180px]")}>
+            <div className={cn(styles.qrRise, "absolute left-[190px] top-32 z-2 h-[214px] w-[180px]")}>
               <div
                 className={cn(
                   styles.qrFloat,
@@ -202,7 +202,7 @@ function HeroStage() {
 
             {/* box body */}
             <div
-              className="absolute left-[155px] top-[340px] z-[3] h-[180px] w-[250px] rounded-[10px_10px_22px_22px] border-2 border-plum bg-ribbon-light shadow-[inset_-18px_0_0_rgba(35,20,46,.1)]"
+              className="absolute left-[155px] top-[340px] z-3 h-[180px] w-[250px] rounded-[10px_10px_22px_22px] border-2 border-plum bg-ribbon-light shadow-[inset_-18px_0_0_rgba(35,20,46,.1)]"
               style={{
                 backgroundImage: "radial-gradient(rgba(255,255,255,.28) 3px, transparent 3.5px)",
                 backgroundSize: "26px 26px",
@@ -212,18 +212,18 @@ function HeroStage() {
             </div>
 
             {/* lid and bow */}
-            <div className={cn(styles.lid, "absolute left-[141px] top-[302px] z-[4] h-[60px] w-[278px]")}>
+            <div className={cn(styles.lid, "absolute left-[141px] top-[302px] z-4 h-[60px] w-[278px]")}>
               <div className="absolute inset-0 rounded-[14px] border-2 border-plum bg-ribbon-lid" />
               <div className="absolute left-[117px] top-0 h-[60px] w-11 border-2 border-plum bg-gold" />
-              <div className="absolute left-[66px] top-[-42px] h-[50px] w-[74px] -rotate-[22deg] rounded-full border-[12px] border-gold outline outline-2 outline-plum" />
-              <div className="absolute left-[138px] top-[-42px] h-[50px] w-[74px] rotate-[22deg] rounded-full border-[12px] border-gold outline outline-2 outline-plum" />
+              <div className="absolute left-[66px] top-[-42px] h-[50px] w-[74px] rotate-[-22deg] rounded-full border-12 border-gold outline-solid outline-2 outline-plum" />
+              <div className="absolute left-[138px] top-[-42px] h-[50px] w-[74px] rotate-22 rounded-full border-12 border-gold outline-solid outline-2 outline-plum" />
               <div className="absolute left-[124px] top-[-14px] h-[26px] w-[30px] rounded-[10px] border-2 border-plum bg-gold" />
             </div>
           </div>
         </div>
 
         {/* items orbiting the box */}
-        <div className="absolute left-[352px] top-10 z-[5] animate-pop-in" style={{ animationDelay: "1.6s" }}>
+        <div className="absolute left-[352px] top-10 z-5 animate-pop-in" style={{ animationDelay: "1.6s" }}>
           <div className="animate-float">
             <div className="w-[190px] rotate-[5deg] rounded-[6px_22px_22px_22px] border-2 border-plum bg-gold px-[18px] py-4 shadow-[5px_5px_0_#23142E]">
               <span className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.08em]">
@@ -234,15 +234,15 @@ function HeroStage() {
             </div>
           </div>
         </div>
-        <div className="absolute left-[400px] top-[250px] z-[5] animate-pop-in" style={{ animationDelay: "1.85s" }}>
+        <div className="absolute left-[400px] top-[250px] z-5 animate-pop-in" style={{ animationDelay: "1.85s" }}>
           <div className="animate-float [animation-direction:reverse] [animation-duration:7s]">
-            <div className="w-[150px] -rotate-[7deg] rounded-lg bg-white px-2 pb-2.5 pt-2 shadow-[0_16px_30px_-14px_rgba(35,20,46,.55)]">
-              <BirthdayScene className="block h-[120px] w-[134px] rounded" />
+            <div className="w-[150px] rotate-[-7deg] rounded-lg bg-white px-2 pb-2.5 pt-2 shadow-[0_16px_30px_-14px_rgba(35,20,46,.55)]">
+              <BirthdayScene className="block h-[120px] w-[134px] rounded-sm" />
               <span className="mt-1 block text-center font-hand text-xl font-bold">best. birthday. ever.</span>
             </div>
           </div>
         </div>
-        <div className="absolute left-0 top-[248px] z-[5] animate-pop-in" style={{ animationDelay: "2.1s" }}>
+        <div className="absolute left-0 top-[248px] z-5 animate-pop-in" style={{ animationDelay: "2.1s" }}>
           <div
             className="flex animate-float items-center gap-2.5 rounded-full border-2 border-plum bg-white py-2 pl-2 pr-[18px] shadow-hard-sm"
             style={{ animationDelay: "1s" }}

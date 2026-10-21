@@ -44,7 +44,7 @@ export function Gallery() {
                 style={{ transform: `rotate(${idea.tilt}deg)` }}
                 aria-hidden={copy || undefined}
               >
-                <idea.Scene className="block h-[216px] w-[216px] rounded" label={copy ? undefined : idea.alt} />
+                <idea.Scene className="block h-[216px] w-[216px] rounded-sm" label={copy ? undefined : idea.alt} />
                 <figcaption className="mt-2 text-center font-hand text-2xl font-bold">{idea.caption}</figcaption>
               </figure>
             );

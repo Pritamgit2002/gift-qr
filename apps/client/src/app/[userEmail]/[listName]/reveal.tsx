@@ -32,9 +32,9 @@ const burst = [
 /** Paper, spinning rays, the logo and the list's name. */
 function Frame({ listName, children }: { listName: string; children: ReactNode }) {
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden bg-paper">
+    <div className="relative min-h-dvh overflow-hidden bg-paper">
       <div aria-hidden="true" className={styles.rays} />
-      <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col px-[22px] pb-[30px] pt-[22px]">
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-[440px] flex-col px-[22px] pb-[30px] pt-[22px]">
         <div className="flex items-center justify-between gap-3">
           <Logo size={28} />
           <span className="max-w-[60%] truncate rounded-full border-2 border-plum bg-white px-3 py-1.5 text-[13px] font-semibold">
@@ -111,7 +111,7 @@ export function Reveal({ listName, surprise }: { listName: string; surprise: Sur
   return (
     <Frame listName={listName}>
       {/* the box opening, behind everything */}
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-16 left-1/2 -ml-[120px] h-[196px] w-[240px]">
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-16 left-1/2 ml-[-120px] h-[196px] w-[240px]">
         <div className={cn(styles.boxSink, "absolute left-2.5 top-9 h-40 w-[220px] rounded-[8px_8px_22px_22px] border-2 border-plum bg-ribbon-light")} />
         <div className={cn(styles.lidOff, "absolute left-0 top-0 h-[52px] w-[240px] rounded-xl border-2 border-plum bg-ribbon-lid")} />
         {burst.map((piece, i) => (
@@ -160,10 +160,10 @@ function SurpriseCard({ surprise }: { surprise: Surprise }) {
       <div
         className={cn(styles.cardUp, "w-full -rotate-2 rounded-[8px_32px_32px_32px] border-2 border-plum bg-gold px-[26px] pb-7 pt-[34px] shadow-hard-md")}
       >
-        <span className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.1em]">
+        <span className="mb-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
           <MessageSquare size={14} strokeWidth={2.5} aria-hidden="true" />A message for you
         </span>
-        <p className={cn("m-0 max-h-[52vh] overflow-auto whitespace-pre-line break-words font-hand font-bold leading-none", size)}>
+        <p className={cn("m-0 max-h-[52vh] overflow-auto whitespace-pre-line wrap-break-word font-hand font-bold leading-none", size)}>
           {surprise.text}
         </p>
       </div>
@@ -217,8 +217,8 @@ function ClosedBox() {
       <span className="absolute left-[100px] top-[70px] block h-40 w-10 border-x-2 border-plum bg-gold" />
       <span className={cn(part, "left-0 top-[34px] h-[52px] w-[240px] rounded-xl bg-ribbon-lid")} />
       <span className={cn(part, "left-[99px] top-[34px] h-[52px] w-[42px] bg-gold")} />
-      <span className="absolute left-[52px] top-[-2px] block h-[46px] w-[70px] -rotate-[22deg] rounded-full border-[12px] border-gold outline outline-2 outline-plum" />
-      <span className="absolute left-[118px] top-[-2px] block h-[46px] w-[70px] rotate-[22deg] rounded-full border-[12px] border-gold outline outline-2 outline-plum" />
+      <span className="absolute left-[52px] top-[-2px] block h-[46px] w-[70px] rotate-[-22deg] rounded-full border-12 border-gold outline-solid outline-2 outline-plum" />
+      <span className="absolute left-[118px] top-[-2px] block h-[46px] w-[70px] rotate-22 rounded-full border-12 border-gold outline-solid outline-2 outline-plum" />
       <span className={cn(part, "left-[106px] top-[22px] h-6 w-7 rounded-[9px] bg-gold")} />
     </span>
   );

@@ -11,8 +11,8 @@ const LINE = 2.5;
 const HEART = "M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z";
 const STAR = "M0 -10 L2 -2 L10 0 L2 2 L0 10 L-2 2 L-10 0 L-2 -2 Z";
 
-const handFont: CSSProperties = { fontFamily: "var(--font-hand), cursive", fontWeight: 700 };
-const sansFont: CSSProperties = { fontFamily: "var(--font-sans), sans-serif", fontWeight: 700 };
+const handFont: CSSProperties = { fontFamily: "var(--next-font-hand), cursive", fontWeight: 700 };
+const sansFont: CSSProperties = { fontFamily: "var(--next-font-sans), sans-serif", fontWeight: 700 };
 
 export type SceneProps = {
   className?: string;
