@@ -1,0 +1,245 @@
+/* Audio and video players. */
+
+.playButton {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid #23142e;
+  background: #d6284a;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #23142e;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s;
+}
+.playButton:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+.playButton:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #23142e;
+}
+.playButton:disabled {
+  cursor: not-allowed;
+  background: #bfaecb;
+}
+
+/* The waveform: one bar per peak, played bars in ribbon red. */
+.wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  cursor: pointer;
+  touch-action: none;
+  border-radius: 8px;
+  outline: none;
+}
+.wave:focus-visible {
+  box-shadow: 0 0 0 3px #ffc23d;
+}
+.waveBar {
+  flex: 1 1 0;
+  min-width: 2px;
+  border-radius: 3px;
+  background: #d9cce3;
+  transition:
+    background 0.15s,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.wave:hover .waveBar {
+  transform: scaleY(1.08);
+}
+.waveBarPlayed {
+  background: #d6284a;
+}
+
+/* Speed menu, shared by both players. */
+.speedButton {
+  min-width: 52px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 2px solid #23142e;
+  background: #fff;
+  color: #23142e;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.2s;
+}
+.speedButton:hover,
+.speedButton[aria-expanded="true"] {
+  background: #ffc23d;
+}
+.speedButtonDark {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(35, 20, 46, 0.55);
+  color: #fff;
+}
+.speedButtonDark:hover,
+.speedButtonDark[aria-expanded="true"] {
+  background: #ffc23d;
+  border-color: #ffc23d;
+  color: #23142e;
+}
+.speedMenu {
+  position: absolute;
+  right: 0;
+  z-index: 20;
+  min-width: 132px;
+  padding: 6px;
+  border-radius: 16px;
+  border: 2px solid #23142e;
+  background: #fff;
+  box-shadow: 4px 4px 0 #23142e;
+  animation: menuIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.speedOption {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #23142e;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+.speedOption:hover {
+  background: #fff0eb;
+}
+.speedOption[aria-checked="true"] {
+  background: #23142e;
+  color: #fff;
+}
+
+/* Video */
+.videoFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #23142e;
+}
+.videoFrame[data-controls="hidden"] {
+  cursor: none;
+}
+.videoFrame:fullscreen {
+  border-radius: 0;
+}
+.bigPlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid #23142e;
+  background: #ffc23d;
+  color: #23142e;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #23142e;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.bigPlay:hover {
+  transform: scale(1.08);
+}
+.videoBar {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 10px 10px;
+  background: linear-gradient(to top, rgba(35, 20, 46, 0.85), rgba(35, 20, 46, 0));
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+}
+.videoBarHidden {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+.videoBar:focus-within {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.videoIcon {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.videoIcon:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* The seek bar: gold up to the playhead. */
+.seek {
+  flex: 1 1 auto;
+  min-width: 40px;
+  height: 6px;
+  appearance: none;
+  border-radius: 6px;
+  background: linear-gradient(to right, #ffc23d var(--progress), rgba(255, 255, 255, 0.35) var(--progress));
+  cursor: pointer;
+}
+.seek::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid #23142e;
+  background: #ffc23d;
+}
+.seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #23142e;
+  background: #ffc23d;
+}
+.seek:focus-visible {
+  outline: 3px solid #ffc23d;
+  outline-offset: 3px;
+}
+
+@keyframes menuIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speedMenu {
+    animation: none;
+  }
+}

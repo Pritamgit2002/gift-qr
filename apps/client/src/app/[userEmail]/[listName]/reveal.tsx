@@ -3,14 +3,18 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUp, MessageSquare, Play } from "lucide-react";
+import { ArrowUp, MessageSquare, Music, Play } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { AudioPlayer } from "@/components/media/audio-player";
+import { VideoPlayer } from "@/components/media/video-player";
 import { cn } from "@/lib/utils";
 import styles from "./reveal.module.css";
 
 export type Surprise =
   | { kind: "message"; text: string }
   | { kind: "photo"; url: string; name: string }
+  | { kind: "video"; url: string; name: string }
+  | { kind: "audio"; url: string; name: string; peaks?: number[] }
   | { kind: "link"; url: string; host: string };
 
 /** How long the link card shows before the link opens, matching its progress bar. */
@@ -47,17 +51,32 @@ function Frame({ listName, children }: { listName: string; children: ReactNode }
   );
 }
 
-/** A page with nothing to unwrap: not found, not paid for, or empty. */
-export function RevealNote({ listName, note, title, body }: { listName: string; note: string; title: string; body: string }) {
+/** A page with nothing to unwrap: not found, not paid for, empty, or not for this viewer. */
+export function RevealNote({
+  listName,
+  note,
+  title,
+  body,
+  action,
+}: {
+  listName: string;
+  note: string;
+  title: string;
+  body: string;
+  /** Shown in place of "Make your own", e.g. a sign-in button. */
+  action?: ReactNode;
+}) {
   return (
     <Frame listName={listName}>
       <div className="my-auto flex flex-col items-center gap-3.5 py-10 text-center">
         <span className="animate-rise font-hand text-3xl font-bold text-ribbon-deep">{note}</span>
         <h1 className="m-0 animate-rise font-display text-[38px] font-extrabold leading-[1.02] tracking-display">{title}</h1>
         <p className="m-0 animate-rise text-base leading-relaxed text-plum-body">{body}</p>
-        <Link className={cn(styles.pill, "mt-3 bg-ribbon text-white hover:text-white")} href="/">
-          Make your own
-        </Link>
+        {action ?? (
+          <Link className={cn(styles.pill, "mt-3 bg-ribbon text-white hover:text-white")} href="/">
+            Make your own
+          </Link>
+        )}
       </div>
     </Frame>
   );
@@ -177,6 +196,32 @@ function SurpriseCard({ surprise }: { surprise: Surprise }) {
         <img src={surprise.url} alt={surprise.name} className="block h-[min(360px,50vh)] w-[min(300px,72vw)] rounded-md object-cover" />
         <figcaption className="mt-2.5 text-center font-hand text-[32px] font-bold leading-tight">{surprise.name}</figcaption>
       </figure>
+    );
+  }
+
+  if (surprise.kind === "video") {
+    return (
+      <figure className={cn(styles.cardUp, "m-0 w-full -rotate-1 rounded-xl bg-white px-3 pb-[18px] pt-3 shadow-[0_30px_50px_-22px_rgba(35,20,46,.6)]")}>
+        <VideoPlayer src={surprise.url} name={surprise.name} className="h-[min(440px,56vh)] w-full rounded-md" />
+        <figcaption className="mt-2.5 text-center font-hand text-[32px] font-bold leading-tight">{surprise.name}</figcaption>
+      </figure>
+    );
+  }
+
+  if (surprise.kind === "audio") {
+    return (
+      <div
+        className={cn(styles.cardUp, "flex w-full rotate-1 flex-col gap-4 rounded-[32px_8px_32px_32px] border-2 border-plum bg-gold px-[22px] pb-6 pt-7 shadow-hard-md")}
+      >
+        <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
+          <Music size={14} strokeWidth={2.5} aria-hidden="true" />
+          Press play, this is for you
+        </span>
+        <p className="m-0 wrap-break-word font-hand text-[40px] font-bold leading-none">{surprise.name}</p>
+        <div className="rounded-[20px] border-2 border-plum bg-white p-3.5">
+          <AudioPlayer src={surprise.url} name={surprise.name} peaks={surprise.peaks} />
+        </div>
+      </div>
     );
   }
 

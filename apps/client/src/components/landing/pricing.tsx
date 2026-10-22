@@ -8,6 +8,8 @@ const chips = [
   { label: "Link", price: ITEM_PRICES.link, gold: false, tilt: 0 },
   { label: "Message", price: ITEM_PRICES.message, gold: true, tilt: -2 },
   { label: "Photo", price: ITEM_PRICES.image, gold: false, tilt: 0 },
+  { label: "Audio", price: ITEM_PRICES.audio, gold: true, tilt: 2 },
+  { label: "Video", price: ITEM_PRICES.video, gold: false, tilt: 0 },
 ];
 
 export function Pricing({ startHref }: { startHref: string }) {

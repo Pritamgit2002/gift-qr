@@ -1,12 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { DraftDetails, IImage, ListSummary, SessionUser } from "@giftqr/shared";
+import {
+  isMediaKind,
+  MEDIA_RULES,
+  type DraftDetails,
+  type ListSummary,
+  type MediaItem,
+  type MediaKind,
+  type SessionUser,
+} from "@giftqr/shared";
 import { formatUrl, isValidLink } from "@/constants";
 import * as listsApi from "@/lib/api/lists";
 import * as draftsApi from "@/lib/api/drafts";
+import { peaksOf } from "@/lib/waveform";
 
-export type ItemKind = "links" | "messages" | "images";
+export type ItemKind = "links" | "messages" | MediaKind;
 
 /** A list plus, for a paid list, the draft of items waiting to be paid for. */
 export type GiftList = ListSummary & { draft: DraftDetails | null };
@@ -16,31 +25,39 @@ export type Item = {
   /** Unique within the list. */
   key: string;
   text: string;
-  image?: IImage;
+  /** Set for photos, videos and audio clips. */
+  media?: MediaItem;
   /** Sitting in the draft, not yet paid for. */
   draft: boolean;
 };
 
 // Guests get free lists, within these limits.
 export const GUEST_LIMITS = { lists: 2, links: 2, messages: 2 } as const;
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+const MB = 1024 * 1024;
 
-const emptyDraft = (): DraftDetails => ({ links: [], messages: [], images: [], status: "unpaid" });
+const emptyDraft = (): DraftDetails => ({
+  links: [],
+  messages: [],
+  images: [],
+  videos: [],
+  audios: [],
+  status: "unpaid",
+});
 
 /** Every item of a list, the draft's last and marked as such. */
 export function itemsOf(list: GiftList, kind: ItemKind): Item[] {
-  const toItems = (values: (string | IImage)[], draft: boolean) =>
+  const toItems = (values: (string | MediaItem)[], draft: boolean) =>
     values.map((value): Item => {
-      const image = typeof value === "string" ? undefined : value;
-      const text = image ? image.imageName : (value as string);
-      return { kind, key: `${draft ? "d" : "l"}:${image?.url ?? text}`, text, image, draft };
+      const media = typeof value === "string" ? undefined : value;
+      const text = media ? media.name : (value as string);
+      return { kind, key: `${draft ? "d" : "l"}:${media?.key ?? text}`, text, media, draft };
     });
   return [...toItems(list[kind], false), ...toItems(list.draft?.[kind] ?? [], true)];
 }
 
 /** "Holiday photos.jpg" → "Holiday Photos" */
-const photoName = (file: File) =>
-  (file.name.replace(/\.[^.]+$/, "") || "Photo")
+const mediaName = (file: File, fallback: string) =>
+  (file.name.replace(/\.[^.]+$/, "") || fallback)
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
@@ -96,7 +113,18 @@ export function useGiftLists(user: SessionUser) {
     const now = Date.now();
     setLists((all) => [
       ...all,
-      { name, links: [], messages: [], images: [], paid: isGuest, updatedAt: now, draft: null },
+      {
+        name,
+        links: [],
+        messages: [],
+        images: [],
+        videos: [],
+        audios: [],
+        allowedEmails: [],
+        paid: isGuest,
+        updatedAt: now,
+        draft: null,
+      },
     ]);
     return { ok: true, message: "List created" };
   }
@@ -137,59 +165,72 @@ export function useGiftLists(user: SessionUser) {
     return { ok: true, message: kind === "links" ? "Link added" : "Message added" };
   }
 
-  async function addPhoto(list: GiftList, file: File): Promise<Result> {
-    if (isGuest) return fail("Sign in with Google to add photos.");
-    if (!file.type.startsWith("image/")) return fail("That file isn't an image.");
-    if (file.size > MAX_PHOTO_BYTES) return fail("Photos can be up to 5 MB.");
-    const imageName = photoName(file);
-    if (itemsOf(list, "images").some((item) => item.text === imageName)) {
-      return fail(`There's already a photo called "${imageName}". Rename the file and try again.`);
+  async function addMedia(list: GiftList, kind: MediaKind, file: File): Promise<Result> {
+    const rule = MEDIA_RULES[kind];
+    if (isGuest) return fail("Sign in with Google to add photos, videos and audio.");
+    if (!file.type.startsWith(rule.mimePrefix)) return fail(`"${file.name}" isn't a ${rule.noun}.`);
+    if (file.size > rule.maxBytes) return fail(`A ${rule.noun} can be up to ${rule.maxBytes / MB} MB.`);
+    const name = mediaName(file, rule.noun.charAt(0).toUpperCase() + rule.noun.slice(1));
+    if (itemsOf(list, kind).some((item) => item.text === name)) {
+      return fail(`There's already a ${rule.noun} called "${name}". Rename the file and try again.`);
     }
+    const peaks = kind === "audios" ? await peaksOf(file) : undefined;
+    const added = `${rule.noun.charAt(0).toUpperCase()}${rule.noun.slice(1)} added`;
 
     if (goesToDraft(list)) {
-      const response = await draftsApi.uploadDraftImage(list.name, file, imageName);
+      const response = await draftsApi.uploadDraftMedia(list.name, kind, file, name, peaks);
       if (!response.success) return fail(response.message);
       update(list.name, (l) => {
         const draft = l.draft ?? emptyDraft();
-        return { ...l, draft: { ...draft, images: [...draft.images, response.data], status: "unpaid" } };
+        return { ...l, draft: { ...draft, [kind]: [...draft[kind], response.data], status: "unpaid" } };
       });
-      return { ok: true, message: "Photo added to the draft" };
+      return { ok: true, message: `${added} to the draft` };
     }
 
-    const response = await listsApi.uploadListImage(list.name, file, imageName);
+    const response = await listsApi.uploadListMedia(list.name, kind, file, name, peaks);
     if (!response.success) return fail(response.message);
-    update(list.name, (l) => ({ ...l, images: [...l.images, response.data], updatedAt: Date.now() }));
-    return { ok: true, message: "Photo added" };
+    update(list.name, (l) => ({ ...l, [kind]: [...l[kind], response.data], updatedAt: Date.now() }));
+    return { ok: true, message: added };
+  }
+
+  /** Who may open the QR besides the owner; none means anyone who scans it. */
+  async function setAccess(list: GiftList, emails: string[]): Promise<Result> {
+    const response = await listsApi.setListAccess(list.name, emails);
+    if (!response.success) return fail(response.message);
+    update(list.name, (l) => ({ ...l, allowedEmails: response.data }));
+    return { ok: true, message: response.message };
   }
 
   async function removeItem(list: GiftList, item: Item): Promise<Result> {
+    const { kind } = item;
     let response;
-    if (item.draft) {
+    if (isMediaKind(kind)) {
+      const key = item.media!.key;
+      response = item.draft
+        ? await draftsApi.deleteDraftMedia(list.name, kind, key)
+        : await listsApi.deleteListMedia(list.name, kind, key);
+    } else if (item.draft) {
       response =
-        item.kind === "links"
+        kind === "links"
           ? await draftsApi.deleteDraftLink(list.name, item.text)
-          : item.kind === "messages"
-            ? await draftsApi.deleteDraftMessage(list.name, item.text)
-            : await draftsApi.deleteDraftImage(list.name, item.image!.url);
+          : await draftsApi.deleteDraftMessage(list.name, item.text);
     } else {
       response =
-        item.kind === "links"
+        kind === "links"
           ? await listsApi.deleteLinkFromList(list.name, item.text)
-          : item.kind === "messages"
-            ? await listsApi.deleteMessageFromList(list.name, item.text)
-            : await listsApi.deleteListImage(list.name, item.image!);
+          : await listsApi.deleteMessageFromList(list.name, item.text);
     }
     if (!response.success) return fail(response.message);
 
-    const keep = (values: (string | IImage)[]) =>
-      values.filter((value) => (typeof value === "string" ? value !== item.text : value.url !== item.image?.url));
+    const keep = (values: (string | MediaItem)[]) =>
+      values.filter((value) => (typeof value === "string" ? value !== item.text : value.key !== item.media?.key));
     update(list.name, (l) => {
-      if (!item.draft) return { ...l, [item.kind]: keep(l[item.kind]) };
+      if (!item.draft) return { ...l, [kind]: keep(l[kind]) };
       const draft = l.draft ?? emptyDraft();
-      return { ...l, draft: { ...draft, [item.kind]: keep(draft[item.kind]) } };
+      return { ...l, draft: { ...draft, [kind]: keep(draft[kind]) } };
     });
     return { ok: true, message: "Removed" };
   }
 
-  return { lists, loading, loadError, isGuest, reload, createList, deleteList, addText, addPhoto, removeItem };
+  return { lists, loading, loadError, isGuest, reload, createList, deleteList, addText, addMedia, setAccess, removeItem };
 }

@@ -1,6 +1,7 @@
 import { Router, type Request } from "express";
 import { currentUser } from "../middleware/auth.js";
-import { imageUpload } from "../middleware/upload.js";
+import { isMediaKind, parsePeaks } from "@giftqr/shared";
+import { mediaUpload } from "../middleware/upload.js";
 import { HttpError, ok, requireString, stringArray } from "../lib/http.js";
 import * as draftService from "../services/drafts.js";
 
@@ -24,21 +25,26 @@ draftsRouter.put("/", async (req, res) => {
   res.json(ok(undefined, "Item added in Draft successfully"));
 });
 
-draftsRouter.post("/images", imageUpload, async (req, res) => {
-  if (!req.file) throw new HttpError(400, "You must add at least one image");
-  const image = await draftService.addDraftImage(
+draftsRouter.post("/media/:kind", mediaUpload, async (req, res) => {
+  const { kind } = req.params as { kind: string };
+  if (!isMediaKind(kind)) throw new HttpError(404, "Unknown media type");
+  if (!req.file) throw new HttpError(400, "file is required");
+  const media = await draftService.addDraftMedia(
     currentUser(req),
     listNameOf(req),
+    kind,
     req.file,
-    requireString(req.body?.imageName, "imageName")
+    requireString(req.body?.name, "name"),
+    parsePeaks(req.body?.peaks)
   );
-  res.status(201).json(ok(image, "Image added successfully"));
+  res.status(201).json(ok(media, "File added successfully"));
 });
 
-draftsRouter.delete("/images", async (req, res) => {
-  const imageUrl = requireString(req.body?.imageUrl, "imageUrl");
-  await draftService.removeDraftImage(currentUser(req).email, listNameOf(req), imageUrl);
-  res.json(ok(undefined, "Image deleted successfully"));
+draftsRouter.delete("/media/:kind", async (req, res) => {
+  const { kind } = req.params as { kind: string };
+  if (!isMediaKind(kind)) throw new HttpError(404, "Unknown media type");
+  await draftService.removeDraftMedia(currentUser(req).email, listNameOf(req), kind, requireString(req.body?.key, "key"));
+  res.json(ok(undefined, "File deleted successfully"));
 });
 
 draftsRouter.delete("/links", async (req, res) => {

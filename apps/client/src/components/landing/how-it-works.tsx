@@ -81,7 +81,7 @@ export function HowItWorks() {
               n={2}
               reveal="scroll-rise-2"
               title="Pack it with surprises"
-              body={`Add links, messages and photos. Pack at least ${MIN_LIST_ITEMS} to unlock your code.`}
+              body={`Add links, messages, photos, videos and audio. Pack at least ${MIN_LIST_ITEMS} to unlock your code.`}
               art={
                 <>
                   <span className={cn(styles.dropItem, chip, "bg-ribbon text-white")}>

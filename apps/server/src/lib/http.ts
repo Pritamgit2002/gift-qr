@@ -1,10 +1,11 @@
-import type { ApiResult } from "@giftqr/shared";
+import type { ApiResult, ErrorCode } from "@giftqr/shared";
 
-/** Thrown from services; the error handler turns it into `{ success: false, message }`. */
+/** Thrown from services; the error handler turns it into `{ success: false, message, code }`. */
 export class HttpError extends Error {
   constructor(
     readonly status: number,
-    message: string
+    message: string,
+    readonly code?: ErrorCode
   ) {
     super(message);
     this.name = "HttpError";

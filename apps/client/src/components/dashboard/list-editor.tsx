@@ -2,13 +2,24 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
-import { Image as ImageIcon, Link as LinkIcon, Loader2, MessageSquare, Trash2, Upload } from "lucide-react";
-import type { PaymentTarget } from "@giftqr/shared";
+import {
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Loader2,
+  MessageSquare,
+  Music,
+  Trash2,
+  Upload,
+  Video,
+} from "lucide-react";
+import { isMediaKind, MEDIA_RULES, type MediaKind, type PaymentTarget } from "@giftqr/shared";
+import { AudioPlayer } from "@/components/media/audio-player";
 import { buttonVariants } from "@/components/brand/button";
 import { cn } from "@/lib/utils";
 import { itemsOf, type GiftList, type Item, type ItemKind, type useGiftLists } from "./use-gift-lists";
 import { summarize, toneClass } from "./summary";
 import { QrPanel } from "./qr-panel";
+import { VideoThumb } from "./video-thumb";
 import styles from "./dashboard.module.css";
 
 type Actions = ReturnType<typeof useGiftLists>;
@@ -17,7 +28,18 @@ const tabs: { kind: ItemKind; label: string; icon: ReactNode; mark: string }[] =
   { kind: "links", label: "Links", icon: <LinkIcon size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "L" },
   { kind: "messages", label: "Messages", icon: <MessageSquare size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "M" },
   { kind: "images", label: "Photos", icon: <ImageIcon size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "P" },
+  { kind: "videos", label: "Videos", icon: <Video size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "V" },
+  { kind: "audios", label: "Audio", icon: <Music size={16} strokeWidth={2.5} aria-hidden="true" />, mark: "A" },
 ];
+
+/** What the drop zone says and takes, per kind of file. */
+const uploadCopy: Record<MediaKind, { accept: string; prompt: string; plural: string }> = {
+  images: { accept: "image/*", prompt: "Drop photos here, or click to upload", plural: "Photos" },
+  videos: { accept: "video/*", prompt: "Drop videos here, or click to upload", plural: "Videos" },
+  audios: { accept: "audio/*", prompt: "Drop voice notes or songs here, or click to upload", plural: "Audio clips" },
+};
+
+const MB = 1024 * 1024;
 
 const addCopy = {
   links: { label: "Add a link", placeholder: "Paste a link, e.g. open.spotify.com/…" },
@@ -80,14 +102,14 @@ export function ListEditor({
 
   const submitText = async (event: FormEvent) => {
     event.preventDefault();
-    if (tab === "images") return;
+    if (isMediaKind(tab)) return;
     const kind = tab;
     if (await run("add", () => actions.addText(list, kind, text))) setText("");
   };
 
-  const uploadPhotos = async (files: FileList | null) => {
+  const uploadFiles = async (kind: MediaKind, files: FileList | null) => {
     for (const file of Array.from(files ?? [])) {
-      await run("add", () => actions.addPhoto(list, file));
+      await run("add", () => actions.addMedia(list, kind, file));
     }
     if (fileInput.current) fileInput.current.value = "";
   };
@@ -125,9 +147,15 @@ export function ListEditor({
         </div>
       </div>
 
-      <div role="tablist" aria-label="Item type" className="flex gap-1.5 rounded-[18px] bg-paper p-1.5">
+      <div role="tablist" aria-label="Item type" className={cn(styles.tabs, "rounded-[18px] bg-paper p-1.5")}>
         {tabs.map((t) => {
-          const count = t.kind === "links" ? summary.links : t.kind === "messages" ? summary.messages : summary.photos;
+          const count = {
+            links: summary.links,
+            messages: summary.messages,
+            images: summary.photos,
+            videos: summary.videos,
+            audios: summary.audios,
+          }[t.kind];
           return (
             <button
               key={t.kind}
@@ -155,7 +183,7 @@ export function ListEditor({
           </p>
         )}
 
-        {tab !== "images" ? (
+        {!isMediaKind(tab) ? (
           <form className="flex flex-wrap gap-2.5" onSubmit={submitText}>
             <label htmlFor={inputId} className="flex flex-[1_1_260px] flex-col gap-1.5 text-sm font-semibold">
               {addCopy[tab].label}
@@ -176,19 +204,20 @@ export function ListEditor({
           </form>
         ) : actions.isGuest ? (
           <p className="m-0 rounded-[18px] bg-shell px-5 py-6 text-center font-semibold text-ribbon-deep">
-            Photos are for Google accounts. Sign in with Google to add them.
+            {uploadCopy[tab].plural} are for Google accounts. Sign in with Google to add them.
           </p>
         ) : (
           <>
             <input
               ref={fileInput}
+              key={tab}
               type="file"
-              accept="image/*"
+              accept={uploadCopy[tab].accept}
               multiple
               className="sr-only"
               tabIndex={-1}
               aria-hidden="true"
-              onChange={(e) => void uploadPhotos(e.target.files)}
+              onChange={(e) => void uploadFiles(tab, e.target.files)}
             />
             <button
               type="button"
@@ -203,7 +232,7 @@ export function ListEditor({
               onDrop={(e) => {
                 e.preventDefault();
                 setDragging(false);
-                void uploadPhotos(e.dataTransfer.files);
+                void uploadFiles(tab, e.dataTransfer.files);
               }}
             >
               {busy === "add" ? (
@@ -214,7 +243,12 @@ export function ListEditor({
               ) : (
                 <>
                   <Upload size={26} strokeWidth={2.4} aria-hidden="true" />
-                  Drop photos here, or click to upload
+                  <span className="flex flex-col items-start text-left">
+                    {uploadCopy[tab].prompt}
+                    <span className="text-sm font-semibold text-plum-mute">
+                      Up to {MEDIA_RULES[tab].maxBytes / MB} MB each
+                    </span>
+                  </span>
                 </>
               )}
             </button>
@@ -224,18 +258,27 @@ export function ListEditor({
         <ul className="m-0 flex min-h-[120px] list-none flex-col gap-2.5 p-0">
           {items.map((item) => (
             <li key={item.key} className={styles.item}>
-              {item.image ? (
-                // eslint-disable-next-line @next/next/no-img-element -- user photos live on S3
-                <img src={item.image.url} alt="" className="h-[52px] w-[52px] flex-none rounded-xl object-cover" />
-              ) : (
+              {item.media && item.kind === "images" ? (
+                // eslint-disable-next-line @next/next/no-img-element -- signed S3 links
+                <img src={item.media.url} alt="" className="h-[52px] w-[52px] flex-none rounded-xl object-cover" />
+              ) : item.media && item.kind === "videos" ? (
+                <VideoThumb src={item.media.url} name={item.text} />
+              ) : item.kind !== "audios" ? (
                 <span
                   className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-shell font-extrabold text-ribbon-deep"
                   aria-hidden="true"
                 >
                   {tabs.find((t) => t.kind === item.kind)?.mark}
                 </span>
+              ) : null}
+              {item.media && item.kind === "audios" ? (
+                <span className="flex min-w-0 flex-1 flex-col gap-1.5 py-1">
+                  <span className="truncate text-base font-semibold">{item.text}</span>
+                  <AudioPlayer src={item.media.url} name={item.text} peaks={item.media.peaks} variant="compact" />
+                </span>
+              ) : (
+                <span className="min-w-0 flex-1 truncate text-base">{item.text}</span>
               )}
-              <span className="min-w-0 flex-1 truncate text-base">{item.text}</span>
               {item.draft && <span className="rounded-full bg-gold px-2.5 py-1 text-xs font-bold">draft</span>}
               <button
                 type="button"
@@ -264,6 +307,7 @@ export function ListEditor({
         isGuest={actions.isGuest}
         paying={paying}
         onPay={onPay}
+        onSetAccess={(emails) => run("access", () => actions.setAccess(list, emails))}
       />
     </section>
   );

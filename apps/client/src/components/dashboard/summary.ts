@@ -8,6 +8,8 @@ export type Summary = {
   links: number;
   messages: number;
   photos: number;
+  videos: number;
+  audios: number;
   /** What unlocking the list costs. */
   price: Price;
   /** Items still needed before it can be paid for; 0 when ready or paid. */
@@ -43,6 +45,8 @@ export function summarize(list: GiftList): Summary {
     links: list.links.length + (list.draft?.links.length ?? 0),
     messages: list.messages.length + (list.draft?.messages.length ?? 0),
     photos: list.images.length + (list.draft?.images.length ?? 0),
+    videos: list.videos.length + (list.draft?.videos.length ?? 0),
+    audios: list.audios.length + (list.draft?.audios.length ?? 0),
     price,
     missing,
     progress: list.paid ? 100 : unlockProgress(price),

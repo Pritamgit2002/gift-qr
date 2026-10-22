@@ -22,6 +22,8 @@ export function ListCard({ list, selected, onSelect }: { list: GiftList; selecte
         <span>{s.links} links</span>
         <span>{s.messages} messages</span>
         <span>{s.photos} photos</span>
+        {s.videos > 0 && <span>{s.videos} videos</span>}
+        {s.audios > 0 && <span>{s.audios} audio</span>}
       </span>
       <span className={styles.barTrack}>
         <span className={styles.barFill} style={{ width: `${s.progress}%` }} />

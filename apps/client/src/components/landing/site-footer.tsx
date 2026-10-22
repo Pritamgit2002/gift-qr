@@ -9,7 +9,7 @@ export function SiteFooter() {
       <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-start justify-between gap-8 px-4 sm:px-8">
         <div className="flex max-w-[340px] flex-col gap-3">
           <Logo size={36} href={null} />
-          <span className="leading-relaxed text-plum-mist">Links, messages and photos, wrapped in one QR code.</span>
+          <span className="leading-relaxed text-plum-mist">Links, messages, photos, videos and audio, wrapped in one QR code.</span>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-7 gap-y-2">
           <Link className={footerLink} href="/#how">

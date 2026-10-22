@@ -9,7 +9,7 @@ export const notFound: RequestHandler = (_req, res) => {
 
 export const errorHandler: ErrorRequestHandler = async (err, req, res, _next) => {
   if (err instanceof HttpError) {
-    res.status(err.status).json({ success: false, message: err.message });
+    res.status(err.status).json({ success: false, message: err.message, code: err.code });
     return;
   }
   if (err instanceof multer.MulterError) {

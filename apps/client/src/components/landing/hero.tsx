@@ -91,7 +91,7 @@ export function Hero({ startHref }: { startHref: string }) {
             className="m-0 max-w-[540px] animate-rise text-xl leading-[1.55] text-plum-body"
             style={{ animationDelay: ".8s" }}
           >
-            Pack one QR code with songs, notes and photos. Every scan unwraps a different surprise, so your gift keeps
+            Pack one QR code with songs, notes, photos and videos. Every scan unwraps a different surprise, so your gift keeps
             giving long after the bow comes off.
           </p>
           <div className="flex animate-rise flex-wrap gap-3.5" style={{ animationDelay: ".95s" }}>

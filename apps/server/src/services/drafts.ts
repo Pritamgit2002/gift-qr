@@ -1,16 +1,19 @@
 import { nanoid } from "nanoid";
 import {
   draftNameFor,
+  MEDIA_KINDS,
   priceOf,
   type CheckoutPayment,
   type DraftDetails,
-  type IImage,
+  type IMedia,
+  type MediaItem,
+  type MediaKind,
   type PaymentOrder,
   type SessionUser,
 } from "@giftqr/shared";
 import { HttpError } from "../lib/http.js";
 import { drafts, lists } from "../lib/mongodb.js";
-import { deleteFromS3, uploadToS3, type UploadedFile } from "../lib/s3.js";
+import { deleteFromS3, uploadToS3, withUrls, type UploadedFile } from "../lib/s3.js";
 import { createOrder, verifyPayment } from "./payments.js";
 
 // A draft holds items added to an already-paid list until they are paid for and merged in.
@@ -20,13 +23,19 @@ const draftOf = (ownerEmail: string, listName: string) => ({
   draftName: draftNameFor(listName),
 });
 
+/** Every media field, empty, for a new draft; less `except`, which the same update sets. */
+const emptyMedia = (except?: MediaKind) =>
+  Object.fromEntries(MEDIA_KINDS.filter((kind) => kind !== except).map((kind) => [kind, []]));
+
 export async function getDraft(ownerEmail: string, listName: string): Promise<DraftDetails> {
   const draft = await drafts.findOne(draftOf(ownerEmail, listName));
   if (!draft) throw new HttpError(404, "Draft not found");
   return {
     links: draft.links ?? [],
     messages: draft.messages ?? [],
-    images: draft.images ?? [],
+    images: await withUrls(draft.images),
+    videos: await withUrls(draft.videos),
+    audios: await withUrls(draft.audios),
     status: draft.status,
   };
 }
@@ -46,39 +55,54 @@ export async function saveDraftItems(
     draftOf(owner.email, listName),
     {
       $set: { status: "unpaid", links, messages, updatedAt: now },
-      $setOnInsert: { id: nanoid(), ownerName: owner.name, ownerType: "user", images: [], createdAt: now },
+      $setOnInsert: { id: nanoid(), ownerName: owner.name, ownerType: "user", ...emptyMedia(), createdAt: now },
     },
     { upsert: true }
   );
 }
 
-export async function addDraftImage(
+export async function addDraftMedia(
   owner: SessionUser,
   listName: string,
+  kind: MediaKind,
   file: UploadedFile,
-  imageName: string
-): Promise<IImage> {
-  const image = { imageName, url: await uploadToS3(file, "draft") };
+  mediaName: string,
+  peaks?: number[]
+): Promise<MediaItem> {
+  const media: IMedia = {
+    name: mediaName,
+    key: await uploadToS3(file, owner.email, kind),
+    ...(kind === "audios" && peaks && { peaks }),
+  };
   const now = Date.now();
   await drafts.updateOne(
     draftOf(owner.email, listName),
     {
-      $addToSet: { images: image },
+      $addToSet: { [kind]: media },
       $set: { status: "unpaid", updatedAt: now },
-      $setOnInsert: { id: nanoid(), ownerName: owner.name, ownerType: "user", links: [], messages: [], createdAt: now },
+      $setOnInsert: {
+        id: nanoid(),
+        ownerName: owner.name,
+        ownerType: "user",
+        links: [],
+        messages: [],
+        ...emptyMedia(kind),
+        createdAt: now,
+      },
     },
     { upsert: true }
   );
-  return image;
+  const [signed] = await withUrls([media]);
+  return signed;
 }
 
-export async function removeDraftImage(ownerEmail: string, listName: string, imageUrl: string) {
+export async function removeDraftMedia(ownerEmail: string, listName: string, kind: MediaKind, key: string) {
   const { modifiedCount } = await drafts.updateOne(draftOf(ownerEmail, listName), {
-    $pull: { images: { url: imageUrl } },
+    $pull: { [kind]: { key } },
   });
-  if (!modifiedCount) throw new HttpError(404, "Image not found or already removed");
-  if (!(await deleteFromS3(imageUrl))) {
-    throw new HttpError(502, "Error deleting image from AWS S3");
+  if (!modifiedCount) throw new HttpError(404, "File not found or already removed");
+  if (!(await deleteFromS3(key))) {
+    throw new HttpError(502, "Error deleting the file from AWS S3");
   }
 }
 
@@ -145,9 +169,11 @@ export async function confirmPayment(ownerEmail: string, listName: string, payme
       links: draft.links,
       messages: draft.messages,
       images: draft.images,
+      videos: draft.videos,
+      audios: draft.audios,
     },
     {
-      $set: { status: "paid", links: [], messages: [], images: [], updatedAt: Date.now() },
+      $set: { status: "paid", links: [], messages: [], ...emptyMedia(), updatedAt: Date.now() },
       $unset: { pendingOrder: "" },
     }
   );
@@ -155,14 +181,12 @@ export async function confirmPayment(ownerEmail: string, listName: string, payme
     throw new HttpError(409, "The draft changed while confirming the payment. Please try again.");
   }
 
-  const push: {
-    links?: { $each: string[] };
-    messages?: { $each: string[] };
-    images?: { $each: IImage[] };
-  } = {};
+  const push: Partial<Record<"links" | "messages", { $each: string[] }> & Record<MediaKind, { $each: IMedia[] }>> = {};
   if (draft.links?.length) push.links = { $each: draft.links };
   if (draft.messages?.length) push.messages = { $each: draft.messages };
-  if (draft.images?.length) push.images = { $each: draft.images };
+  for (const kind of MEDIA_KINDS) {
+    if (draft[kind]?.length) push[kind] = { $each: draft[kind] };
+  }
 
   // Nothing to push when every item was removed while checkout was open.
   const { matchedCount } = await lists.updateOne(

@@ -17,7 +17,7 @@ const questions = [
   },
   {
     q: "What's the minimum?",
-    a: `${MIN_LIST_ITEMS} items per list. Links and messages are ₹${ITEM_PRICES.link} each, photos are ₹${ITEM_PRICES.image}.`,
+    a: `${MIN_LIST_ITEMS} items per list. Links and messages are ₹${ITEM_PRICES.link} each, photos ₹${ITEM_PRICES.image}, audio clips ₹${ITEM_PRICES.audio} and videos ₹${ITEM_PRICES.video}.`,
   },
 ];
 

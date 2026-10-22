@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import { checkout } from "@/lib/checkout";
 import { cn } from "@/lib/utils";
 import { GUEST_LIMITS, useGiftLists } from "./use-gift-lists";
 import { ListCard } from "./list-card";
+import { InvitedGifts } from "./invited-gifts";
 import { ListEditor } from "./list-editor";
 import { Party } from "./party";
 import styles from "./dashboard.module.css";
@@ -32,6 +34,9 @@ export function Dashboard({ user }: { user: SessionUser }) {
 
   const name = user.name.trim() || (isGuest ? "Guest" : "there");
   const firstName = name.split(" ")[0];
+  // Only a real profile photo replaces the initial; guests and photo-less accounts get the local placeholder.
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const showAvatar = !isGuest && user.avatar.startsWith("https://") && !avatarFailed;
 
   // Save the account the first time it signs in; an existing one answers 409, which is fine.
   useEffect(() => {
@@ -85,10 +90,22 @@ export function Dashboard({ user }: { user: SessionUser }) {
           <div className="flex items-center gap-3.5">
             <span className="flex items-center gap-2.5">
               <span
-                className="grid h-11 w-11 place-items-center rounded-full border-2 border-plum bg-gold font-display text-lg font-extrabold"
+                className="grid h-11 w-11 place-items-center overflow-hidden rounded-full border-2 border-plum bg-gold font-display text-lg font-extrabold"
                 aria-hidden="true"
               >
-                {firstName.charAt(0).toUpperCase()}
+                {showAvatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt=""
+                    width={44}
+                    height={44}
+                    className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={() => setAvatarFailed(true)}
+                  />
+                ) : (
+                  firstName.charAt(0).toUpperCase()
+                )}
               </span>
               <span className="flex flex-col leading-tight">
                 <b className="text-[15px]">{name}</b>
@@ -166,9 +183,10 @@ export function Dashboard({ user }: { user: SessionUser }) {
               <span className="text-[15px] leading-normal text-plum-body">
                 {isGuest
                   ? `Guest lists are free: up to ${GUEST_LIMITS.lists} lists, with ${GUEST_LIMITS.links} links and ${GUEST_LIMITS.messages} messages each.`
-                  : `Every list needs ${MIN_LIST_ITEMS} items to unlock. Links and messages are ₹${ITEM_PRICES.link}, photos ₹${ITEM_PRICES.image}.`}
+                  : `Every list needs ${MIN_LIST_ITEMS} items to unlock. Links and messages are ₹${ITEM_PRICES.link}, photos ₹${ITEM_PRICES.image}, audio ₹${ITEM_PRICES.audio}, videos ₹${ITEM_PRICES.video}.`}
               </span>
             </div>
+            <InvitedGifts isGuest={isGuest} />
           </aside>
 
           {current ? (
@@ -181,7 +199,7 @@ export function Dashboard({ user }: { user: SessionUser }) {
               >
                 <span className="font-hand text-[34px] font-bold text-ribbon-deep">your first gift starts here</span>
                 <p className="m-0 max-w-[420px] text-lg leading-relaxed text-plum-body">
-                  Name a list above, then pack it with links, messages and photos.
+                  Name a list above, then pack it with links, messages, photos, videos and audio.
                 </p>
               </section>
             )

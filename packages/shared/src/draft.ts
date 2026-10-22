@@ -1,4 +1,4 @@
-import type { IImage } from "./list.js";
+import type { IMedia } from "./list.js";
 import type { PaymentOrder } from "./payment.js";
 
 export type DraftStatus = "paid" | "unpaid";
@@ -13,7 +13,9 @@ export type IDraft = {
   status: DraftStatus;
   links: string[];
   messages: string[];
-  images: IImage[];
+  images: IMedia[];
+  videos: IMedia[];
+  audios: IMedia[];
   /** The checkout started for these items and not confirmed yet. */
   pendingOrder?: PaymentOrder;
   createdAt: number;

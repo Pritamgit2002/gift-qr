@@ -10,12 +10,13 @@ import { QrArt } from "@/components/brand/art";
 import { cn } from "@/lib/utils";
 import type { GiftList } from "./use-gift-lists";
 import type { Summary } from "./summary";
+import { AccessPanel } from "./access-panel";
 import styles from "./dashboard.module.css";
 
 const qrColors = { dark: "#23142E", light: "#FFFFFF" };
 
 /** The page a scan opens. */
-const scanPath = (ownerEmail: string, listName: string) =>
+export const scanPath = (ownerEmail: string, listName: string) =>
   `/${encodeURIComponent(ownerEmail)}/${encodeURIComponent(listName)}`;
 
 export function QrPanel({
@@ -25,6 +26,7 @@ export function QrPanel({
   isGuest,
   paying,
   onPay,
+  onSetAccess,
 }: {
   list: GiftList;
   summary: Summary;
@@ -32,13 +34,17 @@ export function QrPanel({
   isGuest: boolean;
   paying: PaymentTarget | null;
   onPay: (target: PaymentTarget) => void;
+  /** Saves who may open the QR; resolves true when it worked. */
+  onSetAccess: (emails: string[]) => Promise<boolean>;
 }) {
+  // Chosen before unlocking, and still changeable after: a scan checks it every time.
   return (
-    <div className="border-t-2 border-dashed border-line pt-[22px]">
+    <div className="flex flex-col gap-5 border-t-2 border-dashed border-line pt-[22px]">
+      <AccessPanel emails={list.allowedEmails} ownerEmail={ownerEmail} onSave={onSetAccess} />
       {list.paid ? (
         <LiveCode list={list} summary={summary} ownerEmail={ownerEmail} isGuest={isGuest} paying={paying} onPay={onPay} />
       ) : (
-        <LockedCode summary={summary} paying={paying} onPay={onPay} />
+        <LockedCode summary={summary} invited={list.allowedEmails.length} paying={paying} onPay={onPay} />
       )}
     </div>
   );
@@ -148,14 +154,18 @@ function LiveCode({
 
 function LockedCode({
   summary,
+  invited,
   paying,
   onPay,
 }: {
   summary: Summary;
+  /** How many people the list is limited to; 0 means anyone. */
+  invited: number;
   paying: PaymentTarget | null;
   onPay: (target: PaymentTarget) => void;
 }) {
-  const count = summary.links + summary.messages + summary.photos;
+  const count = summary.links + summary.messages + summary.photos + summary.videos + summary.audios;
+  const audience = invited ? `for ${invited} ${invited === 1 ? "person" : "people"}` : "for everyone";
   return (
     <div className="flex flex-wrap items-center gap-6">
       <div className="relative flex-none overflow-hidden rounded-[22px] border-2 border-dashed border-line-dash bg-paper p-3.5">
@@ -193,7 +203,7 @@ function LockedCode({
             ) : (
               <>
                 <LockOpen size={18} strokeWidth={2.5} aria-hidden="true" />
-                Unlock QR · ₹{summary.price.amount}
+                Unlock {audience} · ₹{summary.price.amount}
               </>
             )}
           </button>

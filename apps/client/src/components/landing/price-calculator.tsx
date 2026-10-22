@@ -9,21 +9,31 @@ import { Sparkle } from "@/components/brand/art";
 import { itemCount, itemsMissing } from "@/lib/pricing";
 import styles from "./landing.module.css";
 
-type Kind = "links" | "messages" | "images";
+type Kind = "links" | "messages" | "images" | "audios" | "videos";
 
 const rows: { kind: Kind; label: string; one: string; each: number }[] = [
   { kind: "links", label: "Links", one: "link", each: ITEM_PRICES.link },
   { kind: "messages", label: "Messages", one: "message", each: ITEM_PRICES.message },
   { kind: "images", label: "Photos", one: "photo", each: ITEM_PRICES.image },
+  { kind: "audios", label: "Audio", one: "audio clip", each: ITEM_PRICES.audio },
+  { kind: "videos", label: "Videos", one: "video", each: ITEM_PRICES.video },
 ];
 
 /** "Pack your gift": change the counts, see what the server would charge. */
 export function PriceCalculator({ startHref }: { startHref: string }) {
-  const [counts, setCounts] = useState<Record<Kind, number>>({ links: 2, messages: 2, images: 0 });
+  const [counts, setCounts] = useState<Record<Kind, number>>({
+    links: 2,
+    messages: 2,
+    images: 0,
+    audios: 0,
+    videos: 0,
+  });
   const price = priceOf("list", {
     links: new Array(counts.links),
     messages: new Array(counts.messages),
     images: new Array(counts.images),
+    audios: new Array(counts.audios),
+    videos: new Array(counts.videos),
   });
   const missing = itemsMissing(price);
 
