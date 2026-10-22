@@ -14,6 +14,7 @@ import {
 import { HttpError } from "../lib/http.js";
 import { drafts, lists } from "../lib/mongodb.js";
 import { deleteFromS3, uploadToS3, withUrls, type UploadedFile } from "../lib/s3.js";
+import { GUESTS_CANT_UPLOAD } from "./lists.js";
 import { createOrder, verifyPayment } from "./payments.js";
 
 // A draft holds items added to an already-paid list until they are paid for and merged in.
@@ -69,6 +70,7 @@ export async function addDraftMedia(
   mediaName: string,
   peaks?: number[]
 ): Promise<MediaItem> {
+  if (owner.type === "guest") throw new HttpError(403, GUESTS_CANT_UPLOAD);
   const media: IMedia = {
     name: mediaName,
     key: await uploadToS3(file, owner.email, kind),

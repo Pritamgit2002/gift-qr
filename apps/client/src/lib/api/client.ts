@@ -24,10 +24,8 @@ export async function request<T = undefined>(
     const res = await fetch(`${baseUrl()}${path}`, {
       cache: "no-store",
       ...init,
-      ...(json !== undefined && {
-        body: JSON.stringify(json),
-        headers: { "Content-Type": "application/json", ...headers },
-      }),
+      headers: json !== undefined ? { "Content-Type": "application/json", ...headers } : headers,
+      ...(json !== undefined && { body: JSON.stringify(json) }),
     });
     return (await res.json()) as ApiResult<T>;
   } catch {

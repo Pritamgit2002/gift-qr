@@ -30,10 +30,13 @@ export type UploadedFile = { buffer: Buffer; mimetype: string };
 const folderOf = (ownerEmail: string) =>
   createHash("sha256").update(ownerEmail.toLowerCase()).digest("hex").slice(0, 16);
 
-// "image/jpeg" -> "jpg", "image/svg+xml" -> "svg", "audio/mpeg" -> "mpeg".
+// Subtypes whose usual file extension differs from their name.
+const EXTENSIONS: Record<string, string> = { jpeg: "jpg", mpeg: "mp3", quicktime: "mov", xm4a: "m4a", xwav: "wav" };
+
+// "image/jpeg" -> "jpg", "image/svg+xml" -> "svg", "audio/mpeg" -> "mp3".
 const extensionOf = (mimetype: string) => {
   const subtype = mimetype.split("/")[1]?.split("+")[0].replace(/[^a-z0-9]/gi, "").toLowerCase();
-  return subtype === "jpeg" ? "jpg" : subtype || "bin";
+  return EXTENSIONS[subtype ?? ""] ?? (subtype || "bin");
 };
 
 /** Uploads a file under `users/<owner folder>/<kind>/` and returns its key. */

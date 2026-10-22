@@ -27,6 +27,8 @@ const assertOpenForItems = (list: Pick<IList, "paid" | "ownerType">) => {
   }
 };
 
+export const GUESTS_CANT_UPLOAD = "Sign in with Google to add photos, videos and audio.";
+
 /** The list's files, each with a signed link. */
 const mediaOf = async (list: Pick<IList, MediaKind>) => {
   const [images, videos, audios] = await Promise.all(MEDIA_KINDS.map((kind) => withUrls(list[kind])));
@@ -206,6 +208,7 @@ export async function addMedia(
 ): Promise<MediaItem> {
   const list = await lists.findOne({ ownerEmail, name }, { projection: { paid: 1, ownerType: 1 } });
   if (!list) throw new HttpError(404, "No matching list found to update");
+  if (list.ownerType === "guest") throw new HttpError(403, GUESTS_CANT_UPLOAD);
   assertOpenForItems(list);
   const media: IMedia = {
     name: mediaName,
