@@ -13,6 +13,7 @@ import {
 import { formatUrl, isValidLink } from "@/constants";
 import * as listsApi from "@/lib/api/lists";
 import * as draftsApi from "@/lib/api/drafts";
+import { GUEST_LIMITS } from "@/lib/pricing";
 import { peaksOf } from "@/lib/waveform";
 
 export type ItemKind = "links" | "messages" | MediaKind;
@@ -31,8 +32,6 @@ export type Item = {
   draft: boolean;
 };
 
-// Guests get free lists, within these limits.
-export const GUEST_LIMITS = { lists: 2, links: 2, messages: 2 } as const;
 const MB = 1024 * 1024;
 
 const emptyDraft = (): DraftDetails => ({

@@ -57,10 +57,18 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
 
           <p className="m-0 animate-rise text-sm text-plum-mute" style={{ animationDelay: ".95s" }}>
             By continuing you agree to our{" "}
-            <Link className="text-ribbon-deep underline hover:text-ribbon-dark" href="/policy">
+            <Link className="text-ribbon-deep underline hover:text-ribbon-dark" href="/terms">
+              terms
+            </Link>{" "}
+            and{" "}
+            <Link className="text-ribbon-deep underline hover:text-ribbon-dark" href="/privacy">
               privacy policy
             </Link>
-            .{" "}
+            , and to the{" "}
+            <Link className="text-ribbon-deep underline hover:text-ribbon-dark" href="/cookies">
+              essential cookies
+            </Link>{" "}
+            that keep you signed in.{" "}
             <Link className="text-ribbon-deep underline hover:text-ribbon-dark" href="/">
               Back to home
             </Link>

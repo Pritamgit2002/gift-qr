@@ -23,7 +23,7 @@ export const LEGAL = {
   website: "giftqr.in",
   /** When the current versions took effect. Change it with every material edit. */
   updated: "22 October 2026",
-} as const;
+};
 
 /** "GiftQR" or "GiftQR, run by <operator>", for opening lines. */
 export const operatedBy = () => (LEGAL.operator ? `GiftQR, run by ${LEGAL.operator}` : "GiftQR");

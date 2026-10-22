@@ -2,11 +2,12 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowUp, MessageSquare, Music, Play } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { AudioPlayer } from "@/components/media/audio-player";
 import { VideoPlayer } from "@/components/media/video-player";
+import { LEGAL } from "@/lib/legal";
 import { cn } from "@/lib/utils";
 import styles from "./reveal.module.css";
 
@@ -84,6 +85,7 @@ export function RevealNote({
 
 export function Reveal({ listName, surprise }: { listName: string; surprise: Surprise }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [opened, setOpened] = useState(false);
 
   // A link opens on its own once its card has had a moment on screen.
@@ -166,10 +168,22 @@ export function Reveal({ listName, surprise }: { listName: string; surprise: Sur
             Make your own
           </Link>
         </div>
+        <a
+          className="mt-1 text-sm text-plum-mute underline underline-offset-2 hover:text-ribbon-deep"
+          href={reportHref(pathname)}
+        >
+          Report this gift
+        </a>
       </div>
     </Frame>
   );
 }
+
+/** A mail to us about this gift, with its link filled in. */
+const reportHref = (pathname: string) =>
+  `mailto:${LEGAL.email}?subject=${encodeURIComponent("Report a gift")}&body=${encodeURIComponent(
+    `Gift link: https://${LEGAL.website}${pathname}\n\nWhat's wrong with it:\n`
+  )}`;
 
 function SurpriseCard({ surprise }: { surprise: Surprise }) {
   if (surprise.kind === "message") {

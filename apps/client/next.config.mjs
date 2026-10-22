@@ -14,9 +14,12 @@ const nextConfig = {
   async rewrites() {
     return [{ source: "/api/server/:path*", destination: `${serverUrl}/:path*` }];
   },
-  // The sign-in page used to live at /form.
+  // The sign-in page used to live at /form, and the privacy policy at /policy.
   async redirects() {
-    return [{ source: "/form", destination: "/sign-in", permanent: true }];
+    return [
+      { source: "/form", destination: "/sign-in", permanent: true },
+      { source: "/policy", destination: "/privacy", permanent: true },
+    ];
   },
 };
 

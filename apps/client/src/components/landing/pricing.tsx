@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import { ITEM_PRICES, MIN_LIST_ITEMS } from "@giftqr/shared";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,12 @@ export function Pricing({ startHref }: { startHref: string }) {
             Pay only for what you pack.
           </h2>
           <p className="scroll-rise-2 m-0 max-w-[480px] text-[19px] leading-relaxed text-plum-body">
-            No plans, no subscriptions. Each list needs at least {MIN_LIST_ITEMS} items before its QR code unlocks.
+            No plans, no subscriptions. Each list needs at least {MIN_LIST_ITEMS} items before its QR code unlocks, and if
+            anything goes wrong on our side, our{" "}
+            <Link className="font-semibold text-ribbon-deep underline hover:text-ribbon-dark" href="/refunds">
+              refund policy
+            </Link>{" "}
+            has you covered.
           </p>
           <div className="scroll-rise-3 flex flex-wrap gap-3.5">
             {chips.map((chip) => (

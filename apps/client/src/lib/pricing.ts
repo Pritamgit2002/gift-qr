@@ -1,5 +1,8 @@
 import { MIN_LIST_ITEMS, type Price } from "@giftqr/shared";
 
+// Guests get free lists, within these limits.
+export const GUEST_LIMITS = { lists: 2, links: 2, messages: 2 } as const;
+
 export const itemCount = (price: Price) =>
   price.links + price.messages + price.images + price.videos + price.audios;
 
