@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start",
+        "-w",
+        "@giftqr/server"
+      ],
+      "port": 4000
+    },
+    {
+      "name": "client-prod",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "AUTH_TRUST_HOST=true",
+        "npm",
+        "run",
+        "start",
+        "-w",
+        "@giftqr/client",
+        "--",
+        "-p",
+        "3123"
+      ],
+      "port": 3123
+    }
+  ]
+}
